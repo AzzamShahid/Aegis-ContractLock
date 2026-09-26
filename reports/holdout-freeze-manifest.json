@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Freeze accepted Aegis state before post-freeze adversarial hardening",
+  "git": {
+    "commit": "91e0be3ca0b5d53f59e9a88334604d07f0672068",
+    "source_tag": "aegis-pre-hardening-freeze-20260927"
+  },
+  "behavioral_contract": {
+    "path": "aegis_contract.yaml",
+    "artifact_sha256": "a3130dd7daa9828ec6951ab7c7ef4b17e8adb8b728524dd44c5ba0019567f993",
+    "behavioral_cases": 86,
+    "workflow_steps": 100,
+    "invariants": 231
+  },
+  "legacy_reference": {
+    "path": "legacy_app/",
+    "tree_sha256": "b6527733356d39900332668a2d341e9da8639d0baa3ec39ca4aa3a823cb2934e"
+  },
+  "accepted_candidate": {
+    "path": "modern_app/",
+    "tree_sha256": "1643b64881699907322f3cbb455a1b82baeda315c180fd2c472f38f54e56fa68",
+    "semantic_evidence_fingerprint": "d919b4055c09e30ee9654d92e302aa64c46195716d53525d57023e1430216c99"
+  },
+  "sealed_baseline": {
+    "path": "baseline/baseline.json",
+    "artifact_sha256": "d608b27ddd47d6568a0c95b305996e24ffb79f0c9d8a037050b7f420f32773a4",
+    "semantic_evidence_fingerprint": "2fd2c2f96614e5bcf8fa807b5c1b777fc702f53707be047ddf01c5a852680da7"
+  },
+  "aegis_verifier": {
+    "path": "aegis/",
+    "tree_sha256": "0a9bc22e0d3a2c03e32ad65071f9b76a011ded7d30c3e0b4ed35b34c11379162"
+  },
+  "pre_holdout_validation": {
+    "engine_tests": "7/7 PASS",
+    "behavioral_verification": "86/86 ACCEPTED",
+    "semantic_drift_cases": 0,
+    "curated_seeded_regressions": 21,
+    "curated_regressions_detected": 21,
+    "legacy_statement_coverage": "100.00%",
+    "legacy_branch_coverage": "98.96%",
+    "modern_legacy_imports": 0,
+    "modern_dependency_cycles": 0,
+    "submission_readiness": "READY"
+  },
+  "holdout_rules": [
+    "The hardened behavioral contract is frozen before generated holdout mutations are created.",
+    "The accepted modern candidate is frozen for the holdout experiment.",
+    "The sealed baseline is frozen for the holdout experiment.",
+    "Surviving generated mutants must be reported rather than silently used to modify the frozen contract.",
+    "IBM Bob clean-room evidence remains a separate historical evidence corpus.",
+    "Post-freeze Antigravity work must not be represented as part of the original IBM Bob clean-room run."
+  ]
+}
