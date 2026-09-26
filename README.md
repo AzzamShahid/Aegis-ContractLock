@@ -1,133 +1,502 @@
 # Aegis ContractLock
 
-> **Evidence-Gated Behavioral Contract Verification for Legacy Modernization**
+> **Evidence-gated AI legacy modernization with IBM Bob**
 
-[![Readiness Gate](https://img.shields.io/badge/Aegis%20Gate-READY-brightgreen)](#reproduction-commands)
-[![Statement Coverage](https://img.shields.io/badge/Statement%20Coverage-100%25-brightgreen)](reports/contract-coverage.md)
-[![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-98.96%25-brightgreen)](reports/contract-coverage.md)
-[![Regression Gauntlet](https://img.shields.io/badge/Regression%20Gauntlet-21%2F21%20Blocked-blue)](reports/gauntlet-report.md)
-[![Modern Architecture](https://img.shields.io/badge/Modern%20Architecture-11%20Modules-informational)](reports/architecture-comparison.md)
+[![Aegis Gate](https://img.shields.io/badge/Aegis%20Gate-READY-brightgreen)](#judge-quick-start)
+[![Legacy Contract Coverage](https://img.shields.io/badge/Legacy%20Contract%20Coverage-100%25%20Statements-brightgreen)](reports/contract-coverage.md)
+[![Branch Coverage](https://img.shields.io/badge/Branches-98.96%25-brightgreen)](reports/contract-coverage.md)
+[![Mutation Audit](https://img.shields.io/badge/Seeded%20Regressions-21%2F21%20Detected-blue)](reports/gauntlet-report.md)
+[![IBM Bob](https://img.shields.io/badge/IBM%20Bob-5%20Captured%20Sessions-informational)](bob_sessions/final/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+AI can refactor legacy software quickly. The harder question is:
+> **How do we know the modernization did not silently change the business?**
+
+Aegis ContractLock separates **generation** from **acceptance**. **IBM Bob reasons about and transforms the system. Aegis independently executes the legacy and modern implementations against a sealed behavioral contract and decides whether the candidate can be accepted.**
+
 ---
 
-## Executive Summary
+# Judge Quick Start
 
-Enterprise legacy modernization with generative AI often fails due to **silent semantic drift**: refactored code appears clean, compiles, and passes synthetic happy-path tests, but subtly alters edge-case business logic, state transitions, ledger balances, or financial rounding.
+If you have only a few minutes, inspect these in order:
 
-**Aegis ContractLock** solves this through **dual-execution behavioral contract locking**:
-1. **Contract Archaeology**: Extracts executable scenarios and explicit business invariants from legacy behavior.
-2. **Deterministic Sealing**: Records a tamper-evident semantic baseline of legacy state transitions, ledger effects, and exceptions.
-3. **Dual Execution & Comparison**: Concurrently runs candidate modern implementations against identical inputs and verifies returns, exceptions, persistent state, idempotency, and invariants.
-4. **Adversarial Gate (Gauntlet)**: Subjected to 21 seeded semantic mutations to ensure the verification gate never exhibits false negatives.
+| What to inspect | Location |
+|---|---|
+| Real IBM Bob task captures | [`bob_sessions/final/`](bob_sessions/final/) |
+| Bob clean-room evidence review | [`bob_evidence/docs/task5-bob-evidence-review.md`](bob_evidence/docs/task5-bob-evidence-review.md) |
+| Hardened behavioral contract | [`aegis_contract.yaml`](aegis_contract.yaml) |
+| Hardened verification report | [`reports/verification.md`](reports/verification.md) |
+| Mutation audit | [`reports/gauntlet-report.md`](reports/gauntlet-report.md) |
+| Architecture comparison | [`reports/architecture-comparison.md`](reports/architecture-comparison.md) |
+| Final readiness report | [`reports/readiness.md`](reports/readiness.md) |
+| Interactive evidence dashboard | [`reports/dashboard.html`](reports/dashboard.html) |
 
-```
-+---------------------------------------------------------------------------------------+
-|                                    AEGIS CONTRACTLOCK                                 |
-|                                                                                       |
-|   +-----------------------+                         +-----------------------------+   |
-|   |   Legacy Monolith     |                         |  Modernized Architecture    |   |
-|   | (legacy_app.billing)  |                         |    (modern_app.billing)     |   |
-|   +-----------+-----------+                         +--------------+--------------+   |
-|               |                                                    |                  |
-|               v                                                    v                  |
-|   +-----------------------+                         +-----------------------------+   |
-|   |   Baseline Evidence   |                         |     Candidate Evidence      |   |
-|   | (baseline/baseline.json)|                       |   (captured via Aegis API)  |   |
-|   +-----------+-----------+                         +--------------+--------------+   |
-|               \                                                    /                  |
-|                \                                                  /                   |
-|                 v                                                v                    |
-|             +--------------------------------------------------------+                |
-|             |          Aegis Dual Comparator & Invariant Engine      |                |
-|             |          (returns, exceptions, ledgers, state, audit)  |                |
-|             +---------------------------+----------------------------+                |
-|                                         |                                             |
-|                                         v                                             |
-|                  +----------------------------------------------+                     |
-|                  |   VERDICT: ACCEPTED / BLOCKED + CERTIFICATE  |                     |
-|                  +----------------------------------------------+                     |
-+---------------------------------------------------------------------------------------+
+### Fast reproduction
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m pytest tests
+python -m aegis.cli coverage
+python -m aegis.cli verify
+python -m aegis.cli architecture
+python -m aegis.cli gauntlet
+python -m aegis.cli readiness
 ```
 
----
-
-## Verified Production Results
-
-Every metric below is strictly reproducible on local disk via `python -m aegis.cli readiness`:
-
-| Metric | Target / Gate | Verified Result | Status |
-|---|---|---:|:---:|
-| **Behavioral Scenarios** | Full specification coverage | **86 scenarios** | PASS |
-| **Workflow Steps** | Multi-step lifecycle execution | **100 steps** | PASS |
-| **Legacy Statement Coverage** | 100% executable statements | **100.00%** | PASS |
-| **Legacy Branch Coverage** | Max reachable branch arcs | **98.96%** | PASS |
-| **Modern Application Verification** | Identical business behavior | **86 / 86 matched** | PASS |
-| **Adversarial Mutation Gauntlet** | Zero false-negative allowance | **21 / 21 detected** | PASS |
-| **Legacy Module Decoupling** | 0 direct imports from `legacy_app` | **0 legacy imports** | PASS |
-| **Dependency Graph Cycles** | Acyclic modernized architecture | **0 cycles detected** | PASS |
-| **Overall Gate Verdict** | All technical gates cleared | **READY** | PASS |
-
-> *Note on Branch Coverage:* The two branch arcs not marked covered represent structurally unreachable legacy defensive artifacts in dead code paths. All executable statements achieve 100.00% line coverage.
+Expected final state:
+```text
+Behavioral verification  ACCEPTED
+Architecture             PASS
+Mutation audit           PASS
+Readiness                READY
+```
 
 ---
 
-## Architecture Evolution: Monolith to Modular Domain
+## The 60-Second Story
 
-Aegis independently verifies both behavioral parity and architectural decoupling:
+The central demonstration is deliberately simple.
 
-| Architectural Dimension | Legacy Implementation | Modernized Architecture |
+```text
+IBM Bob modernization
+       │
+       ▼
+ 47 / 47 behavioral contract cases ACCEPTED
+       │
+       │  Controlled Safety Rehearsal
+       │  one-character semantic regression
+       │  >= → >
+       ▼
+ 46 / 47 BLOCKED
+       │
+       ▼
+ First failing behavioral counterexample
+ VIP customer subtotal = $1000.00
+ Legacy discount rate 10%
+ Regressed candidate 7%
+ Legacy grand total $965.25
+ Candidate grand total $997.43
+ Difference $32.18
+       │
+       ▼
+ IBM Bob Drift Critic
+ pricing.py 1 logical line repaired
+       │
+       ▼
+ 47 / 47 ACCEPTED
+ Original accepted semantic evidence fingerprint restored
+```
+
+The point is not that the injected regression was difficult to write.
+The point is that Aegis independently detected the semantic drift, produced a concrete behavioral counterexample, and gave IBM Bob enough evidence to repair the candidate without weakening the contract, baseline, legacy source, or verifier.
+
+---
+
+## Real IBM Bob Clean-Room Run
+
+The repository contains a separate, genuine IBM Bob clean-room reproduction of the workflow.
+
+This evidence was produced in:
+`AEGIS_BOB_FINAL_RUN`
+
+and is preserved under:
+`bob_evidence/`
+`bob_sessions/final/`
+
+### Captured IBM Bob workflow
+
+| Stage | Result |
+|---|---|
+| Task 1 — Contract Archaeologist | Bob independently reconstructed a 47-case behavioral contract |
+| Task 2 — Modernization Architect | Bob designed the modular target architecture |
+| Task 3 — Modernization Executor | Bob implemented the candidate; 47/47 ACCEPTED |
+| Controlled Safety Rehearsal | Intentional `>=` → `>` regression; 46/47 BLOCKED |
+| Task 4 — Drift Critic & Repair | Bob diagnosed and repaired one logical line; 47/47 ACCEPTED |
+| Task 5 — Final Evidence Review | Re-ran technical gates and reconciled the evidence chain |
+
+### Clean-room contract evidence
+
+| Metric | Result |
+|---|---|
+| Behavioral contract cases | 47 |
+| Unique case IDs | 47 |
+| Workflow steps | 60 |
+| Invariant declarations | 183 |
+| Baseline invariant failures | 0 |
+| Legacy statement coverage | 96.65% |
+| Legacy branch coverage | 91.67% |
+| Readiness | READY |
+
+### Clean-room modernization evidence
+
+| Metric | Result |
+|---|---|
+| Initial modernization | 47 / 47 ACCEPTED |
+| Controlled regression | 46 / 47 BLOCKED |
+| Repaired modernization | 47 / 47 ACCEPTED |
+| Modern imports from legacy | 0 |
+| Dependency cycles | 0 |
+| Legacy analyzed modules | 1 |
+| Modern analyzed modules | 14 |
+| Largest legacy module | 381 LOC |
+| Largest modern module | 147 LOC |
+
+### Semantic evidence lifecycle
+
+```text
+Task 3 accepted
+f6c79144ab8592e71b459be6729ff774740922c15207397c75950773a4e321cf
+       ↓
+Controlled regression BLOCKED
+d569d131fdbe2f23dd9943431f72c435138fa06f4cab4be5bf3959f43a5fd654
+       ↓  One-line Bob repair
+Task 4 repaired
+f6c79144ab8592e71b459be6729ff774740922c15207397c75950773a4e321cf
+```
+
+The repaired candidate returned to the same semantic evidence fingerprint as the originally accepted Bob candidate.
+
+> SHA-256 values here are evidence/integrity fingerprints. They are not proofs of correctness, digital signatures, or authorship claims.
+
+### IBM Bob captures
+
+- [`01_contract_archaeologist.png`](bob_sessions/final/01_contract_archaeologist.png)
+- [`02_modernization_architect.png`](bob_sessions/final/02_modernization_architect.png)
+- [`03_modernization_executor.png`](bob_sessions/final/03_modernization_executor.png)
+- [`04_drift_critic_repair.png`](bob_sessions/final/04_drift_critic_repair.png)
+- [`05_final_evidence_review.png`](bob_sessions/final/05_final_evidence_review.png)
+
+The five captured task-session UIs show a combined 17.30 Bobcoins.
+Bobcoin values come from IBM Bob UI captures and are not recomputed by Aegis.
+
+For subagent-output limitations and full provenance disclosure, see:
+[`bob_evidence/docs/task5-bob-evidence-review.md`](bob_evidence/docs/task5-bob-evidence-review.md)
+
+---
+
+## Hardened Public Validation Package
+
+The root repository is the broader hardened validation package.
+It is intentionally separate from the 47-case IBM Bob clean-room run.
+
+| Metric | Hardened Result |
+|---|---|
+| Behavioral contract cases | 86 |
+| Workflow steps | 100 |
+| Contract invariants | 231 |
+| Legacy statement coverage | 100.00% |
+| Legacy branch coverage | 98.96% |
+| Modernization verification | 86 / 86 ACCEPTED |
+| Seeded semantic regressions | 21 |
+| Regressions detected | 21 / 21 |
+| Modern imports from legacy | 0 |
+| Dependency cycles | 0 |
+| Overall readiness | READY |
+
+### Why two evidence tracks?
+
+They answer different questions.
+
+#### IBM Bob clean-room run
+Demonstrates that the modernization lifecycle was genuinely executed in IBM Bob:
+> legacy system → contract archaeology → architecture → implementation → independent rejection → diagnosis → repair → re-verification
+
+#### Hardened public validation package
+Provides a broader contract corpus and additional verifier-validation fixtures:
+- 86 behavioral contract cases
+- 100 workflow steps
+- 231 invariants
+- 21 seeded negative controls
+
+The two corpora are deliberately not merged into synthetic metrics.
+The IBM Bob clean-room run and the separately hardened public validation package are distinct evidence corpora. Their metrics and fingerprints remain separately attributed.
+
+---
+
+## How Aegis Works
+
+```text
+                     AEGIS CONTRACTLOCK
+                ┌────────────────────────────┐
+                │    Behavioral Contract     │
+                │ cases + steps + invariants │
+                └──────────────┬─────────────┘
+                               │ identical scenario inputs
+               ┌───────────────┴────────────────┐
+               │                                │
+               ▼                                ▼
+    ┌────────────────────────┐      ┌────────────────────────┐
+    │     Legacy System      │      │    Modern Candidate    │
+    │   legacy_app.billing   │      │   modern_app.billing   │
+    └────────────┬───────────┘      └────────────┬───────────┘
+                 │                               │
+                 ▼                               ▼
+    ┌────────────────────────┐      ┌────────────────────────┐
+    │   Baseline Evidence    │      │   Candidate Evidence   │
+    │  results + state +     │      │  results + state +     │
+    │    ledger + audit      │      │    ledger + audit      │
+    └────────────┬───────────┘      └────────────┬───────────┘
+                 │                               │
+                 └──────────────┬────────────────┘
+                                ▼
+                    ┌─────────────────────┐
+                    │ Semantic Comparator │
+                    │ + invariant engine  │
+                    └──────────┬──────────┘
+                               │
+                      ┌────────┴────────┐
+                      ▼                 ▼
+                  ACCEPTED           BLOCKED
+                                        │
+                                        ▼
+                            Behavioral counterexample
+                                        │
+                                        ▼
+                                 IBM Bob repair
+```
+
+Aegis compares observable behavior including:
+- return values
+- normalized exceptions
+- persistent state
+- invoice/refund state transitions
+- ledger effects
+- audit events
+- idempotency behavior
+- explicit contract invariants
+
+---
+
+## Architecture Evolution
+
+The hardened public package modernizes the billing monolith into an isolated modular design.
+
+| Architectural Dimension | Legacy | Hardened Modern |
 |---|---:|---:|
-| **Python Modules** | 1 (`billing/monolith.py`) | **11 modules** |
-| **Largest Module Size** | 381 non-comment LOC | **205 non-comment LOC** |
-| **Total Non-Comment LOC** | 381 LOC | **453 LOC** |
-| **Functions** | 12 | **32** |
-| **Classes** | 6 | **8** |
-| **Internal Dependency Edges** | 0 (monolith) | **18 (explicit acyclic graph)** |
-| **Circular Dependencies** | 0 | **0** |
-| **Coupling to Legacy** | N/A | **Zero imports from `legacy_app`** |
+| Analyzed Python modules | 1 | 11 |
+| Largest module LOC | 381 | 205 |
+| Total non-comment LOC | 381 | 453 |
+| Functions | 12 | 32 |
+| Classes | 6 | 8 |
+| Internal dependency edges | 0 | 18 |
+| Dependency cycles | 0 | 0 |
+| Imports from legacy_app | N/A | 0 |
 
-### Modern Module Overview (`modern_app/billing/`)
-- `api.py`: Public entrypoint implementing identical signatures to legacy billing.
-- `service.py`: High-level domain coordinator and transaction workflow manager.
-- `pricing_policy.py`: Tier-based VIP discounts, volume discounts, and edge boundaries.
-- `tax_policy.py`: Jurisdiction-specific sales tax calculation and rounding rules.
-- `shipping_policy.py`: Weight brackets, express shipping fees, and surcharge calculations.
-- `refund_policy.py`: Granular refund validation, window limits, and ledger rebalancing.
-- `storage.py`: In-memory isolated persistent repository for invoices and refunds.
-- `events.py`: Audit event dispatcher with idempotent replay support.
-- `money.py`: Exact-precision decimal financial primitives eliminating float drift.
-- `errors.py`: Normalized exception hierarchy mapping 1-to-1 with legacy contract errors.
-- `__init__.py`: Clean public interface exposing domain primitives.
+### Hardened modern modules
+
+`modern_app/billing/`
+- `api.py` — public facade
+- `service.py` — workflow orchestration
+- `pricing_policy.py` — stepped tier discounts and coupon rules
+- `tax_policy.py` — regional/category tax rules
+- `shipping_policy.py` — shipping thresholds
+- `refund_policy.py` — refund policy
+- `storage.py` — isolated in-memory persistence
+- `events.py` — audit events
+- `money.py` — deterministic decimal handling
+- `errors.py` — domain exceptions
+- `__init__.py` — public package interface
 
 ---
 
 ## Judge Evidence Map
 
-To review the project artifacts, follow this evidence path:
+### IBM Bob clean-room evidence
 
-### 1. Specification & Contract
-- [**Contract Schema Guide**](docs/CONTRACT_SCHEMA_GUIDE.md): Specification for scenario definitions, step assertions, and invariant rules.
-- [**Behavioral Contract Specification**](aegis_contract.yaml): Complete 86-scenario behavioral contract.
+| Artifact | Purpose |
+|---|---|
+| [`bob_sessions/final/`](bob_sessions/final/) | Five genuine IBM Bob task captures |
+| [`bob_evidence/aegis_contract_bob_clean_room.yaml`](bob_evidence/aegis_contract_bob_clean_room.yaml) | Bob-generated 47-case contract |
+| [`bob_evidence/docs/contract-archaeology-report.md`](bob_evidence/docs/contract-archaeology-report.md) | Bob contract reconstruction |
+| [`bob_evidence/docs/modernization-plan.md`](bob_evidence/docs/modernization-plan.md) | Bob architecture plan |
+| [`bob_evidence/docs/task3-implementation-report.md`](bob_evidence/docs/task3-implementation-report.md) | Bob implementation evidence |
+| [`bob_evidence/reports/task4-blocked-verification.md`](bob_evidence/reports/task4-blocked-verification.md) | Preserved BLOCKED result |
+| [`bob_evidence/docs/task4-drift-diagnosis.md`](bob_evidence/docs/task4-drift-diagnosis.md) | Drift diagnosis |
+| [`bob_evidence/docs/task4-repair-report.md`](bob_evidence/docs/task4-repair-report.md) | One-line repair evidence |
+| [`bob_evidence/reports/task4-repaired-verification.md`](bob_evidence/reports/task4-repaired-verification.md) | Repaired ACCEPTED result |
+| [`bob_evidence/docs/task5-bob-evidence-review.md`](bob_evidence/docs/task5-bob-evidence-review.md) | Final clean-room evidence audit |
 
-### 2. Modernization Lifecycle & Audit Reports
-- [**Contract Archaeology Report**](docs/contract-archaeology-report.md): Analysis of legacy monolith behavior, hidden invariants, and branch boundaries.
-- [**Modernization Plan**](docs/modernization-plan.md): Architectural design target, domain separation, and decoupling rules.
-- [**Task 3 Implementation Report**](docs/task3-implementation-report.md): Execution of modern implementation and initial acceptance.
-- [**Controlled Safety Rehearsal**](docs/controlled-safety-rehearsal.md): Demonstration of Aegis blocking semantic regressions (VIP boundary drift).
-- [**Task 4 Drift Diagnosis**](docs/task4-drift-diagnosis.md): Invariant failure analysis and root cause identification.
-- [**Task 4 Repair Report**](docs/task4-repair-report.md): Surgical fix restoring behavioral equivalence without architecture degradation.
-- [**Verifier Adversarial Audit**](docs/verifier-adversarial-audit.md): Complete gauntlet review of 21 mutation scenarios.
-- [**Validation Fixture Provenance**](docs/validation-fixture-provenance.md): Explicit documentation of negative-control fixture introduction and isolation.
-- [**Final Evidence Review**](docs/final-evidence-review.md): Comprehensive synthesis of all lifecycle verification evidence.
+### Hardened public validation evidence
 
-### 3. Generated Verification Reports
-- [**Contract Coverage Report**](reports/contract-coverage.md) (`json`: [contract-coverage.json](reports/contract-coverage.json)): Statement and branch coverage analysis.
-- [**Architecture Comparison**](reports/architecture-comparison.md) (`json`: [architecture-comparison.json](reports/architecture-comparison.json)): Structural metrics before vs after modernization.
-- [**Regression Gauntlet Report**](reports/gauntlet-report.md) (`json`: [gauntlet-report.json](reports/gauntlet-report.json)): Matrix of 21 mutants and detection invariants.
-- [**Submission Readiness Report**](reports/readiness.md) (`json`: [readiness.json](reports/readiness.json)): Complete automated pre-flight gate check.
-- [**Evidence Certificate**](reports/evidence-certificate.md) (`json`: [evidence-certificate.json](reports/evidence-certificate.json)): Cryptographic digest confirming zero drift.
-- [**Interactive HTML Dashboard**](reports/dashboard.html): Standalone visual dashboard summarizing all verification dimensions.
+| Artifact | Purpose |
+|---|---|
+| [`aegis_contract.yaml`](aegis_contract.yaml) | 86-case behavioral contract |
+| [`docs/CONTRACT_SCHEMA_GUIDE.md`](docs/CONTRACT_SCHEMA_GUIDE.md) | Contract schema |
+| [`docs/contract-archaeology-report.md`](docs/contract-archaeology-report.md) | Hardened archaeology report |
+| [`docs/modernization-plan.md`](docs/modernization-plan.md) | Architecture plan |
+| [`docs/controlled-safety-rehearsal.md`](docs/controlled-safety-rehearsal.md) | Controlled regression record |
+| [`docs/verifier-adversarial-audit.md`](docs/verifier-adversarial-audit.md) | Mutation audit |
+| [`docs/validation-fixture-provenance.md`](docs/validation-fixture-provenance.md) | Fixture provenance |
+| [`docs/final-evidence-review.md`](docs/final-evidence-review.md) | Hardened final review |
+| [`reports/contract-coverage.md`](reports/contract-coverage.md) | Legacy behavioral-contract coverage |
+| [`reports/architecture-comparison.md`](reports/architecture-comparison.md) | Structural comparison |
+| [`reports/gauntlet-report.md`](reports/gauntlet-report.md) | 21-regression detection matrix |
+| [`reports/readiness.md`](reports/readiness.md) | Automated readiness gate |
+| [`reports/evidence-certificate.md`](reports/evidence-certificate.md) | Evidence fingerprints and zero-drift result |
+| [`reports/dashboard.html`](reports/dashboard.html) | Standalone evidence dashboard |
+
+---
+
+## Reproduction Commands
+
+### Environment
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+### Run engine tests
+```powershell
+python -m pytest tests
+```
+*Expected:*
+```text
+7 passed
+```
+
+### Measure legacy behavioral-contract coverage
+```powershell
+python -m aegis.cli coverage
+```
+*Expected hardened package result:*
+```text
+Statement coverage: 100.00%
+Branch coverage: 98.96%
+```
+
+### Verify hardened modern candidate
+```powershell
+python -m aegis.cli verify
+```
+*Expected:*
+```text
+86 / 86 matched
+VERDICT: ACCEPTED
+```
+
+### Run architecture analysis
+```powershell
+python -m aegis.cli architecture
+```
+*Expected:*
+```text
+Modern modules: 11
+Modern imports from legacy: 0
+Dependency cycles: 0
+```
+
+### Run verifier mutation audit
+```powershell
+python -m aegis.cli gauntlet
+```
+*Expected:*
+```text
+Seeded regressions: 21
+Detected: 21
+Escaped: 0
+```
+
+### Run complete readiness gate
+```powershell
+python -m aegis.cli readiness
+```
+*Expected:*
+```text
+READY — SELF-CONTAINED EVIDENCE PACKAGE PASSED
+```
+
+---
+
+## Testing Layers
+
+Aegis deliberately separates three different types of evidence.
+
+### 1. Behavioral-contract validation
+- 86 behavioral contract cases
+- 100 workflow steps
+- 231 explicit invariants
+
+This evaluates observable legacy-versus-modern behavior.
+
+### 2. Aegis engine test suite
+- 7 automated tests
+
+These exercise verification infrastructure and integration behavior.
+
+### 3. Verifier mutation audit
+- 21 seeded semantic regressions
+- 21 detected
+- 0 escaped
+
+These negative controls test whether the verifier can go red when known business semantics are altered.
+
+The mutation audit is a seeded negative-control suite, not an automatically generated exhaustive mutation score.
+
+---
+
+## Evidence Integrity
+
+Aegis uses SHA-256 in several places.
+
+The terminology matters:
+
+- **Semantic evidence fingerprint**: A canonical fingerprint over normalized execution evidence. Used to compare observable behavior while excluding metadata such as timestamps.
+- **Artifact / source fingerprint**: A SHA-256 value used to detect whether a specific artifact changed.
+
+### Counterexample terminology
+
+Aegis presents a detected mismatch as a **behavioral counterexample** (or first failing behavioral counterexample). It does not claim mathematical minimization of that counterexample.
+
+Historical preserved verification artifacts may retain older renderer wording such as `MINIMAL COUNTEREXAMPLE`. Those files are intentionally preserved as historical evidence rather than rewritten after the fact; the public submission terminology is **behavioral counterexample**.
+
+### What SHA-256 does not establish
+A hash alone does not prove:
+- correctness
+- authorship
+- provenance by a specific person
+- formal program equivalence
+- immutability of an external storage system
+
+It provides a deterministic integrity/evidence fingerprint relative to the recorded artifact or canonical semantic payload.
+
+---
+
+## What Aegis Demonstrates — and What It Does Not
+
+Aegis demonstrates:
+- Behavioral equivalence across the defined contract and executed scenario corpus.
+
+It does not establish formal or exhaustive program equivalence.
+
+Important limitations:
+- behavior outside the contract corpus is not evaluated
+- contract quality limits verifier coverage
+- the demo target is a controlled in-memory billing system
+- the hardened mutation audit uses deliberately selected negative controls
+- the current candidate execution model is not a hardened hostile-code sandbox
+- hashes are integrity fingerprints, not signatures or correctness proofs
+- coverage values refer specifically to legacy behavioral-contract coverage, not whole-repository test coverage
+
+This scope is intentional and explicitly documented.
+
+---
+
+## Clean-Room and Fixture Provenance
+
+The modernization workflow and verifier-validation fixtures are kept conceptually separate.
+
+The hardened submission package documents that mutation fixtures were introduced as negative controls for verifier validation, not as an answer key for the modernization agent.
+
+See:
+[`docs/validation-fixture-provenance.md`](docs/validation-fixture-provenance.md)
+
+The genuine IBM Bob run is preserved independently under:
+[`bob_evidence/`](bob_evidence/)
+
+This prevents its 47-case clean-room metrics from being confused with the broader 86-case hardened corpus.
 
 ---
 
@@ -136,146 +505,53 @@ To review the project artifacts, follow this evidence path:
 ```text
 Aegis-ContractLock/
 │
-├── aegis/                          # Core verification engine
-│   ├── cli.py                      # Unified CLI entrypoint
-│   ├── contracts.py                # YAML contract loader & schema validator
-│   ├── runner.py                   # Multi-step scenario executor
-│   ├── baseline.py                 # Baseline execution & serialization
-│   ├── comparator.py               # Deep semantic behavioral comparator
-│   ├── invariants.py               # Explicit business invariant checkers
-│   ├── gauntlet.py                 # Adversarial mutant evaluation harness
-│   ├── architecture.py             # AST structural metric & cycle detector
-│   ├── coverage_report.py          # Statement & branch coverage analyzer
-│   ├── coverage_worker.py          # Isolated coverage subprocess worker
-│   ├── certificate.py              # Cryptographic evidence certifier
-│   ├── dashboard.py                # Standalone HTML dashboard generator
-│   ├── readiness.py                # Pre-flight submission gate orchestrator
-│   ├── evidence.py                 # Evidence container data models
-│   └── util.py                     # Safe normalization & serialization helpers
+├── aegis/                          # Verification engine
+├── legacy_app/                     # Legacy billing monolith
+├── modern_app/                     # Hardened modular modernization
+├── baseline/                       # Hardened semantic baseline
+├── tests/                          # Aegis engine tests
+├── rehearsal_mutations/            # Seeded negative controls
 │
-├── legacy_app/                     # Unmodified legacy codebase
-│   ├── billing/
-│   │   └── monolith.py             # 381 LOC single-file legacy billing system
-│   └── docs/
-│       └── BILLING_POLICY.md       # Original enterprise billing policy documentation
+├── bob_prompts/                    # IBM Bob workflow prompts
+├── bob_sessions/
+│   ├── final/                      # 5 genuine final Bob captures
+│   └── archive/                    # Historical exploratory captures
 │
-├── modern_app/                     # Modernized, decoupled domain architecture
-│   └── billing/                    # 11 decoupled domain modules (453 LOC total)
-│       ├── api.py                  # Public facade
-│       ├── service.py              # Application workflow service
-│       ├── pricing_policy.py       # Discount & VIP policy logic
-│       ├── tax_policy.py           # Tax calculation rules
-│       ├── shipping_policy.py      # Shipping rules & fees
-│       ├── refund_policy.py        # Refund validations & balances
-│       ├── storage.py              # Isolated in-memory repository
-│       ├── events.py               # Audit event dispatcher
-│       ├── money.py                # Exact decimal monetary types
-│       └── errors.py               # Domain exceptions
+├── bob_evidence/                   # Separate IBM Bob clean-room corpus
+│   ├── aegis_contract_bob_clean_room.yaml
+│   ├── baseline/
+│   ├── docs/
+│   └── reports/
 │
-├── baseline/                       # Sealed baseline artifacts
-│   └── baseline.json               # Deterministic legacy execution baseline (86 cases)
+├── docs/                           # Hardened engineering/audit reports
+├── reports/                        # Hardened generated evidence
 │
-├── tests/                          # Automated engine tests
-│   └── test_rehearsal.py           # Verification of acceptance, rejection, & gauntlet
-│
-├── rehearsal_mutations/            # Deterministic negative-control fixtures
-│   ├── mutants.py                  # 21 semantic regression mutants (e.g. boundary drifts)
-│   └── _ref/                       # Internal reference modules for mutant isolation
-│
-├── bob_prompts/                    # Prompt sequence for IBM Bob workflow
-│   ├── 01_contract_archaeologist.md
-│   ├── 02_modernization_architect.md
-│   ├── 03_modernization_executor.md
-│   ├── 04_drift_critic_and_repair.md
-│   └── 05_final_evidence_review.md
-│
-├── bob_sessions/                   # IBM Bob evidence & session logs
-│   ├── README.md                   # Provenance statement & screenshot guide
-│   ├── final/                      # Production alignment session captures
-│   └── archive/                    # Historical initial exploratory Bob sessions
-│
-├── docs/                           # Engineering reports and lifecycle logs
-├── reports/                        # Machine-readable & markdown verification evidence
-├── aegis_contract.yaml             # Complete 86-scenario behavioral contract
-├── requirements.txt                # Minimal external dependencies (PyYAML, pytest)
-├── .bobrules                       # System instructions governing AI agents
-├── .gitignore                      # Git ignore configuration
-├── THIRD_PARTY_NOTICES.md          # Third-party dependency licenses
+├── aegis_contract.yaml             # Hardened 86-case contract
+├── requirements.txt
+├── .bobrules
+├── .gitignore
+├── THIRD_PARTY_NOTICES.md
 ├── LICENSE                         # MIT License
-└── README.md                       # This document
+└── README.md
 ```
 
 ---
 
-## Reproduction Commands
+## Third-Party Software
 
-### 1. Environment Setup
+Third-party dependencies retain their own licenses.
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-### 2. Run Comprehensive Pre-Flight Gate Check
-
-```powershell
-python -m aegis.cli readiness
-```
-*Expected Output:* `SUBMISSION READINESS: READY` across all 7 gates.
-
-### 3. Run Engine Test Suite
-
-```powershell
-python -m pytest tests
-```
-*Expected Output:* `7 passed in < 3s`
-
-### 4. Inspect Contract Statement & Branch Coverage
-
-```powershell
-python -m aegis.cli coverage
-```
-*Expected Output:* `100.00% statement coverage`, `98.96% branch coverage`.
-
-### 5. Verify Modernized Application Against Baseline
-
-```powershell
-python -m aegis.cli verify modern_app.billing.api
-```
-*Expected Output:* `86 / 86 scenarios matched`, `VERDICT: ACCEPTED`.
-
-### 6. Run Adversarial Mutation Gauntlet
-
-```powershell
-python -m aegis.cli gauntlet
-```
-*Expected Output:* `21 / 21 mutants caught`, `0 undetected regressions`.
-
-### 7. Inspect Structural Architecture Metrics
-
-```powershell
-python -m aegis.cli architecture
-```
-*Expected Output:* `11 modules`, `0 legacy imports`, `0 dependency cycles`.
-
----
-
-## Verification Scope & Provenance
-
-> **Important Note on Baseline Evidence:**
-> Baseline semantic evidence in `baseline/baseline.json` is sealed by Aegis. Timestamps, serialization order, and local disk paths are normalized away during comparison; only observable semantic state, return values, normalized exceptions, ledger balances, and audit events serve as correctness evidence.
-
-> **Important Note on Rehearsal Fixtures:**
-> `rehearsal_mutations/` contains deterministic negative-control fixtures used to demonstrate that the behavioral gate detects known semantic regressions. These fixtures were introduced after clean-room modernization to validate verifier sensitivity, as documented in [`docs/validation-fixture-provenance.md`](docs/validation-fixture-provenance.md).
-
-> **Verification Boundaries:**
-> A passing result certifies behavioral equivalence across the defined 86 scenarios, 100 execution steps, and explicit domain invariants. As specified in `.bobrules` Rule 11, it is evidence of equivalence over the contract corpus, not an unbounded formal proof of all possible runtime states.
+See:
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
 
 ---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+Aegis ContractLock original project code and project-authored materials are licensed under the [MIT License](LICENSE).
 
+---
 
+## Submission Thesis
+
+Most AI developer workflows optimize generation speed. Aegis focuses on the acceptance problem: IBM Bob transforms the system; Aegis independently checks whether that transformation preserved the behavior represented by the sealed contract.
