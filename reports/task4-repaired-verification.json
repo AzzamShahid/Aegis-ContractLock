@@ -1,0 +1,444 @@
+{
+  "comparison": {
+    "verdict": "ACCEPTED",
+    "case_count": 86,
+    "matched": 86,
+    "drifted": 0,
+    "cases": [
+      {
+        "case_id": "bnd_bus_subtotal_1000_00",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_bus_subtotal_1000_01",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_bus_subtotal_1999_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_bus_subtotal_2000_00",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_bus_subtotal_2000_01",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_bus_subtotal_999_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_vip_subtotal_1000_00",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_vip_subtotal_1000_01",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_vip_subtotal_499_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_vip_subtotal_500_00",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_vip_subtotal_500_01",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "bnd_vip_subtotal_999_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_case_insensitivity",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_ceiling_subtotal",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_fixed25_above_250_01",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_fixed25_at_250_00",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_fixed25_below_249_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_welcome10_bus_high_capped",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_welcome10_bus_mid",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_welcome10_retail",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_welcome10_vip_high_capped",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_welcome10_vip_low",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_welcome10_vip_mid_capped",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "default_values_customer_and_item",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "fee_bank_transfer_high_value",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "fee_card_above_1500_01",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "fee_card_at_1500_00",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "fee_card_below_1499_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "idempotency_invoice_exact_replay",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "idempotency_invoice_tampered_payload",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "idempotency_refund_exact_replay",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_after_manual_review_allowed",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_duplicate_approved_rejected",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_fee_window_25h",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_fee_window_72h",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_full_window_0h",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_full_window_24h",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_manual_review_73h",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "retail_high_value_order",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "retail_standard_order",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "rounding_bankers_half_even_discount",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "rounding_multiline_proportional_residual",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "rounding_refund_fee_half_even",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_eu_de_at_250_00",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_eu_de_below_249_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_export_flat_high",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_export_flat_low",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_pre_discount_subtotal_trap",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_uk_at_250_00",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_uk_below_249_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_us_ca_above_150_01",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_us_ca_at_150_00",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_us_ca_below_149_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_us_ny_below_149_99",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_eu_de_digital",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_eu_de_essential",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_eu_de_goods",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_export_all_categories",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_uk_digital",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_uk_essential",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_uk_goods",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_us_ca_digital",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_us_ca_essential",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_us_ca_goods",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_us_ny_digital",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_us_ny_essential",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_us_ny_goods",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_zero_subtotal_short_circuit",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_empty_items",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_item_missing_sku",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_item_negative_price",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_item_negative_qty",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_item_unknown_category",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_item_zero_qty",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_missing_customer_id",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_missing_operation_id",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_refund_invoice_not_found",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_refund_missing_invoice_id",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_refund_missing_op_id",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_refund_negative_hours",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_suspended_customer",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_unknown_coupon",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_unknown_customer_tier",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_unknown_payment_method",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_unknown_region",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "val_unsupported_operation",
+        "status": "MATCH",
+        "diffs": []
+      }
+    ],
+    "minimal_counterexample": null
+  },
+  "baseline_evidence_sha256": "2fd2c2f96614e5bcf8fa807b5c1b777fc702f53707be047ddf01c5a852680da7",
+  "candidate_evidence_sha256": "d919b4055c09e30ee9654d92e302aa64c46195716d53525d57023e1430216c99",
+  "candidate_factory": "modern_app.billing.api:create_service"
+}

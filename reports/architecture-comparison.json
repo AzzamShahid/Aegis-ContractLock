@@ -1,0 +1,115 @@
+{
+  "before": {
+    "module_count": 1,
+    "largest_module_loc": 381,
+    "total_loc": 381,
+    "function_count": 12,
+    "class_count": 6,
+    "dependency_edges": 0,
+    "circular_dependencies": [],
+    "legacy_imports": [],
+    "modules": [
+      {
+        "module": "billing.monolith",
+        "file": "legacy_app/billing/monolith.py",
+        "loc": 381,
+        "functions": 12,
+        "classes": 6
+      }
+    ]
+  },
+  "after": {
+    "module_count": 11,
+    "largest_module_loc": 205,
+    "total_loc": 453,
+    "function_count": 32,
+    "class_count": 8,
+    "dependency_edges": 18,
+    "circular_dependencies": [],
+    "legacy_imports": [],
+    "modules": [
+      {
+        "module": "billing.__init__",
+        "file": "modern_app/billing/__init__.py",
+        "loc": 4,
+        "functions": 0,
+        "classes": 0
+      },
+      {
+        "module": "billing.api",
+        "file": "modern_app/billing/api.py",
+        "loc": 8,
+        "functions": 1,
+        "classes": 0
+      },
+      {
+        "module": "billing.errors",
+        "file": "modern_app/billing/errors.py",
+        "loc": 12,
+        "functions": 0,
+        "classes": 5
+      },
+      {
+        "module": "billing.events",
+        "file": "modern_app/billing/events.py",
+        "loc": 19,
+        "functions": 3,
+        "classes": 1
+      },
+      {
+        "module": "billing.money",
+        "file": "modern_app/billing/money.py",
+        "loc": 15,
+        "functions": 5,
+        "classes": 0
+      },
+      {
+        "module": "billing.pricing_policy",
+        "file": "modern_app/billing/pricing_policy.py",
+        "loc": 45,
+        "functions": 4,
+        "classes": 0
+      },
+      {
+        "module": "billing.refund_policy",
+        "file": "modern_app/billing/refund_policy.py",
+        "loc": 23,
+        "functions": 1,
+        "classes": 0
+      },
+      {
+        "module": "billing.service",
+        "file": "modern_app/billing/service.py",
+        "loc": 205,
+        "functions": 5,
+        "classes": 1
+      },
+      {
+        "module": "billing.shipping_policy",
+        "file": "modern_app/billing/shipping_policy.py",
+        "loc": 10,
+        "functions": 1,
+        "classes": 0
+      },
+      {
+        "module": "billing.storage",
+        "file": "modern_app/billing/storage.py",
+        "loc": 61,
+        "functions": 11,
+        "classes": 1
+      },
+      {
+        "module": "billing.tax_policy",
+        "file": "modern_app/billing/tax_policy.py",
+        "loc": 51,
+        "functions": 1,
+        "classes": 0
+      }
+    ]
+  },
+  "checks": {
+    "modern_has_no_legacy_imports": true,
+    "modern_has_no_cycles": true,
+    "largest_module_reduced": true
+  }
+}

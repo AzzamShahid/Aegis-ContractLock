@@ -1,0 +1,156 @@
+{
+  "seeded_regressions": 21,
+  "detected": 21,
+  "escaped": 0,
+  "detection_rate": 100.0,
+  "verifier_validation": "PASS",
+  "mutants": [
+    {
+      "name": "vip_1000_strict",
+      "factory": "rehearsal_mutations.mutants:vip_1000_strict",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "bnd_vip_subtotal_1000_00"
+    },
+    {
+      "name": "vip_500_strict",
+      "factory": "rehearsal_mutations.mutants:vip_500_strict",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "bnd_vip_subtotal_500_00"
+    },
+    {
+      "name": "business_2000_strict",
+      "factory": "rehearsal_mutations.mutants:business_2000_strict",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "bnd_bus_subtotal_2000_00"
+    },
+    {
+      "name": "business_1000_strict",
+      "factory": "rehearsal_mutations.mutants:business_1000_strict",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "bnd_bus_subtotal_1000_00"
+    },
+    {
+      "name": "welcome_cap_20",
+      "factory": "rehearsal_mutations.mutants:welcome_cap_20",
+      "detected": true,
+      "drifted_cases": 3,
+      "counterexample": "coupon_welcome10_bus_high_capped"
+    },
+    {
+      "name": "fixed25_strict",
+      "factory": "rehearsal_mutations.mutants:fixed25_strict",
+      "detected": true,
+      "drifted_cases": 2,
+      "counterexample": "coupon_ceiling_subtotal"
+    },
+    {
+      "name": "us_shipping_strict",
+      "factory": "rehearsal_mutations.mutants:us_shipping_strict",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "shipping_us_ca_at_150_00"
+    },
+    {
+      "name": "eu_shipping_strict",
+      "factory": "rehearsal_mutations.mutants:eu_shipping_strict",
+      "detected": true,
+      "drifted_cases": 2,
+      "counterexample": "shipping_eu_de_at_250_00"
+    },
+    {
+      "name": "eude_essential_standard_tax",
+      "factory": "rehearsal_mutations.mutants:eude_essential_standard_tax",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "tax_eu_de_essential"
+    },
+    {
+      "name": "uk_essential_taxed",
+      "factory": "rehearsal_mutations.mutants:uk_essential_taxed",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "tax_uk_essential"
+    },
+    {
+      "name": "export_taxed",
+      "factory": "rehearsal_mutations.mutants:export_taxed",
+      "detected": true,
+      "drifted_cases": 4,
+      "counterexample": "rounding_refund_fee_half_even"
+    },
+    {
+      "name": "ny_digital_exempt",
+      "factory": "rehearsal_mutations.mutants:ny_digital_exempt",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "tax_us_ny_digital"
+    },
+    {
+      "name": "ca_goods_wrong_rate",
+      "factory": "rehearsal_mutations.mutants:ca_goods_wrong_rate",
+      "detected": true,
+      "drifted_cases": 38,
+      "counterexample": "bnd_vip_subtotal_1000_00"
+    },
+    {
+      "name": "card_fee_strict",
+      "factory": "rehearsal_mutations.mutants:card_fee_strict",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "fee_card_at_1500_00"
+    },
+    {
+      "name": "refund_24_strict",
+      "factory": "rehearsal_mutations.mutants:refund_24_strict",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "refund_full_window_24h"
+    },
+    {
+      "name": "refund_72_strict",
+      "factory": "rehearsal_mutations.mutants:refund_72_strict",
+      "detected": true,
+      "drifted_cases": 1,
+      "counterexample": "refund_fee_window_72h"
+    },
+    {
+      "name": "refund_direction_debit",
+      "factory": "rehearsal_mutations.mutants:refund_direction_debit",
+      "detected": true,
+      "drifted_cases": 8,
+      "counterexample": "idempotency_refund_exact_replay"
+    },
+    {
+      "name": "omit_refund_ledger",
+      "factory": "rehearsal_mutations.mutants:omit_refund_ledger",
+      "detected": true,
+      "drifted_cases": 8,
+      "counterexample": "idempotency_refund_exact_replay"
+    },
+    {
+      "name": "omit_invoice_audit",
+      "factory": "rehearsal_mutations.mutants:omit_invoice_audit",
+      "detected": true,
+      "drifted_cases": 68,
+      "counterexample": "bnd_bus_subtotal_1000_00"
+    },
+    {
+      "name": "omit_refund_audit",
+      "factory": "rehearsal_mutations.mutants:omit_refund_audit",
+      "detected": true,
+      "drifted_cases": 8,
+      "counterexample": "idempotency_refund_exact_replay"
+    },
+    {
+      "name": "no_idempotency",
+      "factory": "rehearsal_mutations.mutants:no_idempotency",
+      "detected": true,
+      "drifted_cases": 3,
+      "counterexample": "idempotency_invoice_exact_replay"
+    }
+  ]
+}

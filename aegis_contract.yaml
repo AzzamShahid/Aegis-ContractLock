@@ -1,0 +1,2758 @@
+version: '2.0'
+metadata:
+  name: Aegis ContractLock Billing Behavioral Contract V2
+  purpose: Evidence-gated legacy modernization with measurable behavioral coverage
+subject:
+  legacy_factory: legacy_app.billing.monolith:create_service
+  candidate_factory: modern_app.billing.api:create_service
+readiness:
+  statement_coverage_min: 95.0
+  branch_coverage_min: 90.0
+  critical_tags:
+  - critical_boundary
+  - validation
+  - refund
+  - idempotency
+  - tax
+outputs:
+  baseline: baseline/baseline.json
+  candidate_evidence: reports/candidate-evidence.json
+  verification_json: reports/verification.json
+  verification_md: reports/verification.md
+  coverage_json: reports/contract-coverage.json
+  coverage_md: reports/contract-coverage.md
+  gauntlet_json: reports/gauntlet-report.json
+  gauntlet_md: reports/gauntlet-report.md
+  architecture_json: reports/architecture-comparison.json
+  architecture_md: reports/architecture-comparison.md
+  certificate_json: reports/evidence-certificate.json
+  certificate_md: reports/evidence-certificate.md
+  dashboard_html: reports/dashboard.html
+  readiness_json: reports/readiness.json
+  readiness_md: reports/readiness.md
+cases:
+- id: bnd_vip_subtotal_499_99
+  description: VIP customer subtotal immediately below $500.00 threshold receives
+    3% discount
+  tags:
+  - critical_boundary
+  - discount
+  - vip
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-vip-499-99
+      customer:
+        id: C-VIP-01
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-499
+        qty: 1
+        unit_price: '499.99'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_vip_499_99-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_vip_499_99-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0300'
+  - id: bnd_vip_499_99-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_vip_subtotal_500_00
+  description: VIP customer subtotal exactly at $500.00 threshold receives 7% discount
+  tags:
+  - critical_boundary
+  - discount
+  - vip
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-vip-500-00
+      customer:
+        id: C-VIP-02
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-500
+        qty: 1
+        unit_price: '500.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_vip_500_00-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_vip_500_00-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0700'
+  - id: bnd_vip_500_00-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_vip_subtotal_500_01
+  description: VIP customer subtotal immediately above $500.00 threshold receives
+    7% discount
+  tags:
+  - critical_boundary
+  - discount
+  - vip
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-vip-500-01
+      customer:
+        id: C-VIP-03
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-500-01
+        qty: 1
+        unit_price: '500.01'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_vip_500_01-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_vip_500_01-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0700'
+  - id: bnd_vip_500_01-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_vip_subtotal_999_99
+  description: VIP customer subtotal immediately below $1000.00 threshold receives
+    7% discount
+  tags:
+  - critical_boundary
+  - discount
+  - vip
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-vip-999-99
+      customer:
+        id: C-VIP-04
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-999
+        qty: 1
+        unit_price: '999.99'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_vip_999_99-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_vip_999_99-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0700'
+  - id: bnd_vip_999_99-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_vip_subtotal_1000_00
+  description: VIP customer subtotal exactly at $1000.00 threshold receives 10% discount
+  tags:
+  - critical_boundary
+  - discount
+  - vip
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-vip-1000-00
+      customer:
+        id: C-VIP-05
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-1000
+        qty: 1
+        unit_price: '1000.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_vip_1000_00-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_vip_1000_00-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.1000'
+  - id: bnd_vip_1000_00-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_vip_subtotal_1000_01
+  description: VIP customer subtotal immediately above $1000.00 threshold receives
+    10% discount
+  tags:
+  - critical_boundary
+  - discount
+  - vip
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-vip-1000-01
+      customer:
+        id: C-VIP-06
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-1000-01
+        qty: 1
+        unit_price: '1000.01'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_vip_1000_01-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_vip_1000_01-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.1000'
+  - id: bnd_vip_1000_01-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_bus_subtotal_999_99
+  description: Business customer subtotal immediately below $1000.00 threshold receives
+    0% discount
+  tags:
+  - business
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-bus-999-99
+      customer:
+        id: C-BUS-01
+        tier: BUSINESS
+        region: US_NY
+      items:
+      - sku: SKU-BUS-999
+        qty: 1
+        unit_price: '999.99'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_bus_999_99-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_bus_999_99-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0000'
+  - id: bnd_bus_999_99-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_bus_subtotal_1000_00
+  description: Business customer subtotal exactly at $1000.00 threshold receives 4%
+    discount
+  tags:
+  - business
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-bus-1000-00
+      customer:
+        id: C-BUS-02
+        tier: BUSINESS
+        region: US_NY
+      items:
+      - sku: SKU-BUS-1000
+        qty: 1
+        unit_price: '1000.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_bus_1000_00-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_bus_1000_00-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0400'
+  - id: bnd_bus_1000_00-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_bus_subtotal_1000_01
+  description: Business customer subtotal immediately above $1000.00 threshold receives
+    4% discount
+  tags:
+  - business
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-bus-1000-01
+      customer:
+        id: C-BUS-03
+        tier: BUSINESS
+        region: US_NY
+      items:
+      - sku: SKU-BUS-1000-01
+        qty: 1
+        unit_price: '1000.01'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_bus_1000_01-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_bus_1000_01-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0400'
+  - id: bnd_bus_1000_01-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_bus_subtotal_1999_99
+  description: Business customer subtotal immediately below $2000.00 threshold receives
+    4% discount
+  tags:
+  - business
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-bus-1999-99
+      customer:
+        id: C-BUS-04
+        tier: BUSINESS
+        region: US_NY
+      items:
+      - sku: SKU-BUS-1999
+        qty: 1
+        unit_price: '1999.99'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_bus_1999_99-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_bus_1999_99-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0400'
+  - id: bnd_bus_1999_99-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_bus_subtotal_2000_00
+  description: Business customer subtotal exactly at $2000.00 threshold receives 6%
+    discount
+  tags:
+  - business
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-bus-2000-00
+      customer:
+        id: C-BUS-05
+        tier: BUSINESS
+        region: US_NY
+      items:
+      - sku: SKU-BUS-2000
+        qty: 1
+        unit_price: '2000.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_bus_2000_00-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_bus_2000_00-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0600'
+  - id: bnd_bus_2000_00-eq
+    type: invoice_total_equation
+    step: inv
+- id: bnd_bus_subtotal_2000_01
+  description: Business customer subtotal immediately above $2000.00 threshold receives
+    6% discount
+  tags:
+  - business
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-bus-2000-01
+      customer:
+        id: C-BUS-06
+        tier: BUSINESS
+        region: US_NY
+      items:
+      - sku: SKU-BUS-2000-01
+        qty: 1
+        unit_price: '2000.01'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: bnd_bus_2000_01-noexc
+    type: no_exception
+    step: inv
+  - id: bnd_bus_2000_01-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0600'
+  - id: bnd_bus_2000_01-eq
+    type: invoice_total_equation
+    step: inv
+- id: retail_standard_order
+  description: Retail customer receives 0% discount on standard order
+  tags:
+  - discount
+  - retail
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ret-100
+      customer:
+        id: C-RET-01
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-RET-1
+        qty: 2
+        unit_price: '50.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: retail_100-noexc
+    type: no_exception
+    step: inv
+  - id: retail_100-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0000'
+  - id: retail_100-eq
+    type: invoice_total_equation
+    step: inv
+- id: retail_high_value_order
+  description: Retail customer receives 0% discount even on high value $2500 order
+  tags:
+  - discount
+  - retail
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ret-2500
+      customer:
+        id: C-RET-02
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-RET-2
+        qty: 1
+        unit_price: '2500.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: retail_2500-noexc
+    type: no_exception
+    step: inv
+  - id: retail_2500-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.0000'
+  - id: retail_2500-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_welcome10_retail
+  description: WELCOME10 coupon adds 10% to RETAIL customer rate
+  tags:
+  - coupon
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-w10-ret
+      customer:
+        id: C-RET-03
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-CPN-1
+        qty: 1
+        unit_price: '100.00'
+      coupon: WELCOME10
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_w10_ret-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_w10_ret-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.1000'
+  - id: cpn_w10_ret-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_welcome10_vip_low
+  description: WELCOME10 coupon adds 10% to VIP low bracket rate (3% -> 13%)
+  tags:
+  - coupon
+  - critical_boundary
+  - discount
+  - vip
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-w10-vip-low
+      customer:
+        id: C-VIP-07
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-CPN-2
+        qty: 1
+        unit_price: '400.00'
+      coupon: WELCOME10
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_w10_viplow-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_w10_viplow-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.1300'
+  - id: cpn_w10_viplow-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_welcome10_vip_mid_capped
+  description: WELCOME10 coupon combined with VIP mid rate (7% + 10% = 17%) is capped
+    at 15%
+  tags:
+  - coupon
+  - critical_boundary
+  - discount
+  - vip
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-w10-vip-mid
+      customer:
+        id: C-VIP-08
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-CPN-3
+        qty: 1
+        unit_price: '600.00'
+      coupon: WELCOME10
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_w10_vipmid-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_w10_vipmid-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.1500'
+  - id: cpn_w10_vipmid-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_welcome10_vip_high_capped
+  description: WELCOME10 coupon combined with VIP high rate (10% + 10% = 20%) is capped
+    at 15%
+  tags:
+  - coupon
+  - critical_boundary
+  - discount
+  - vip
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-w10-vip-hi
+      customer:
+        id: C-VIP-09
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-CPN-4
+        qty: 1
+        unit_price: '1200.00'
+      coupon: WELCOME10
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_w10_viphi-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_w10_viphi-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.1500'
+  - id: cpn_w10_viphi-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_welcome10_bus_mid
+  description: WELCOME10 coupon combined with Business mid rate (4% + 10% = 14%)
+  tags:
+  - business
+  - coupon
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-w10-bus-mid
+      customer:
+        id: C-BUS-07
+        tier: BUSINESS
+        region: US_NY
+      items:
+      - sku: SKU-CPN-5
+        qty: 1
+        unit_price: '1500.00'
+      coupon: WELCOME10
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_w10_busmid-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_w10_busmid-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.1400'
+  - id: cpn_w10_busmid-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_welcome10_bus_high_capped
+  description: WELCOME10 coupon combined with Business high rate (6% + 10% = 16%)
+    is capped at 15%
+  tags:
+  - business
+  - coupon
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-w10-bus-hi
+      customer:
+        id: C-BUS-08
+        tier: BUSINESS
+        region: US_NY
+      items:
+      - sku: SKU-CPN-6
+        qty: 1
+        unit_price: '2200.00'
+      coupon: WELCOME10
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_w10_bushi-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_w10_bushi-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.1500'
+  - id: cpn_w10_bushi-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_fixed25_below_249_99
+  description: FIXED25 coupon on subtotal immediately below $250.00 grants no discount
+  tags:
+  - coupon
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-f25-249
+      customer:
+        id: C-RET-04
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-F25-1
+        qty: 1
+        unit_price: '249.99'
+      coupon: FIXED25
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_f25_249-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_f25_249-disc
+    type: field_equals
+    step: inv
+    path: result.discount
+    value: '0.00'
+  - id: cpn_f25_249-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_fixed25_at_250_00
+  description: FIXED25 coupon on subtotal exactly at $250.00 grants $25.00 discount
+  tags:
+  - coupon
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-f25-250
+      customer:
+        id: C-RET-05
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-F25-2
+        qty: 1
+        unit_price: '250.00'
+      coupon: FIXED25
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_f25_250-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_f25_250-disc
+    type: field_equals
+    step: inv
+    path: result.discount
+    value: '25.00'
+  - id: cpn_f25_250-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_fixed25_above_250_01
+  description: FIXED25 coupon on subtotal immediately above $250.00 grants $25.00
+    discount
+  tags:
+  - coupon
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-f25-250-01
+      customer:
+        id: C-RET-06
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-F25-3
+        qty: 1
+        unit_price: '250.01'
+      coupon: FIXED25
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_f25_250_01-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_f25_250_01-disc
+    type: field_equals
+    step: inv
+    path: result.discount
+    value: '25.00'
+  - id: cpn_f25_250_01-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_case_insensitivity
+  description: Coupon code parsing is case-insensitive ('welcome10')
+  tags:
+  - coupon
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-case
+      customer:
+        id: C-RET-07
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-CASE
+        qty: 1
+        unit_price: '100.00'
+      coupon: welcome10
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_case-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_case-rate
+    type: field_equals
+    step: inv
+    path: result.discount_rate
+    value: '0.1000'
+  - id: cpn_case-eq
+    type: invoice_total_equation
+    step: inv
+- id: coupon_ceiling_subtotal
+  description: Discount cannot exceed merchandise subtotal
+  tags:
+  - coupon
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-cpn-ceil
+      customer:
+        id: C-VIP-10
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-BIG
+        qty: 1
+        unit_price: '250.00'
+      coupon: FIXED25
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: cpn_ceil-noexc
+    type: no_exception
+    step: inv
+  - id: cpn_ceil-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_us_ca_below_149_99
+  description: US_CA order immediately below $150.00 incurs $12.00 shipping
+  tags:
+  - critical_boundary
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-us-149
+      customer:
+        id: C-SHP-01
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-SHP-1
+        qty: 1
+        unit_price: '149.99'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_us_149-noexc
+    type: no_exception
+    step: inv
+  - id: shp_us_149-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '12.00'
+  - id: shp_us_149-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_us_ca_at_150_00
+  description: US_CA order exactly at $150.00 qualifies for free shipping ($0.00)
+  tags:
+  - critical_boundary
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-us-150
+      customer:
+        id: C-SHP-02
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-SHP-2
+        qty: 1
+        unit_price: '150.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_us_150-noexc
+    type: no_exception
+    step: inv
+  - id: shp_us_150-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '0.00'
+  - id: shp_us_150-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_us_ca_above_150_01
+  description: US_CA order immediately above $150.00 qualifies for free shipping ($0.00)
+  tags:
+  - critical_boundary
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-us-150-01
+      customer:
+        id: C-SHP-03
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-SHP-3
+        qty: 1
+        unit_price: '150.01'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_us_150_01-noexc
+    type: no_exception
+    step: inv
+  - id: shp_us_150_01-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '0.00'
+  - id: shp_us_150_01-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_us_ny_below_149_99
+  description: US_NY order immediately below $150.00 incurs $12.00 shipping
+  tags:
+  - critical_boundary
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-ny-149
+      customer:
+        id: C-SHP-04
+        tier: RETAIL
+        region: US_NY
+      items:
+      - sku: SKU-SHP-4
+        qty: 1
+        unit_price: '149.99'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_ny_149-noexc
+    type: no_exception
+    step: inv
+  - id: shp_ny_149-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '12.00'
+  - id: shp_ny_149-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_eu_de_below_249_99
+  description: EU_DE order immediately below $250.00 incurs $18.00 shipping
+  tags:
+  - critical_boundary
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-de-249
+      customer:
+        id: C-SHP-05
+        tier: RETAIL
+        region: EU_DE
+      items:
+      - sku: SKU-SHP-5
+        qty: 1
+        unit_price: '249.99'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_de_249-noexc
+    type: no_exception
+    step: inv
+  - id: shp_de_249-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '18.00'
+  - id: shp_de_249-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_eu_de_at_250_00
+  description: EU_DE order exactly at $250.00 qualifies for free shipping ($0.00)
+  tags:
+  - critical_boundary
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-de-250
+      customer:
+        id: C-SHP-06
+        tier: RETAIL
+        region: EU_DE
+      items:
+      - sku: SKU-SHP-6
+        qty: 1
+        unit_price: '250.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_de_250-noexc
+    type: no_exception
+    step: inv
+  - id: shp_de_250-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '0.00'
+  - id: shp_de_250-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_uk_below_249_99
+  description: UK order immediately below $250.00 incurs $18.00 shipping
+  tags:
+  - critical_boundary
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-uk-249
+      customer:
+        id: C-SHP-07
+        tier: RETAIL
+        region: UK
+      items:
+      - sku: SKU-SHP-7
+        qty: 1
+        unit_price: '249.99'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_uk_249-noexc
+    type: no_exception
+    step: inv
+  - id: shp_uk_249-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '18.00'
+  - id: shp_uk_249-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_uk_at_250_00
+  description: UK order exactly at $250.00 qualifies for free shipping ($0.00)
+  tags:
+  - critical_boundary
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-uk-250
+      customer:
+        id: C-SHP-08
+        tier: RETAIL
+        region: UK
+      items:
+      - sku: SKU-SHP-8
+        qty: 1
+        unit_price: '250.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_uk_250-noexc
+    type: no_exception
+    step: inv
+  - id: shp_uk_250-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '0.00'
+  - id: shp_uk_250-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_export_flat_low
+  description: EXPORT order incurs flat $35.00 shipping on low subtotal
+  tags:
+  - export
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-exp-50
+      customer:
+        id: C-SHP-09
+        tier: RETAIL
+        region: EXPORT
+      items:
+      - sku: SKU-SHP-9
+        qty: 1
+        unit_price: '50.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_exp_low-noexc
+    type: no_exception
+    step: inv
+  - id: shp_exp_low-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '35.00'
+  - id: shp_exp_low-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_export_flat_high
+  description: EXPORT order incurs flat $35.00 shipping even on high subtotal ($1000.00)
+  tags:
+  - export
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-exp-1000
+      customer:
+        id: C-SHP-10
+        tier: RETAIL
+        region: EXPORT
+      items:
+      - sku: SKU-SHP-10
+        qty: 1
+        unit_price: '1000.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_exp_hi-noexc
+    type: no_exception
+    step: inv
+  - id: shp_exp_hi-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '35.00'
+  - id: shp_exp_hi-eq
+    type: invoice_total_equation
+    step: inv
+- id: shipping_pre_discount_subtotal_trap
+  description: Shipping threshold is evaluated against pre-discount subtotal ($160.00
+    >= $150.00 -> free shipping despite discounted subtotal $135.00)
+  tags:
+  - critical_boundary
+  - discount
+  - shipping
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-shp-trap-1
+      customer:
+        id: C-SHP-11
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-SHP-11
+        qty: 1
+        unit_price: '260.00'
+      coupon: FIXED25
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: shp_trap-noexc
+    type: no_exception
+    step: inv
+  - id: shp_trap-val
+    type: field_equals
+    step: inv
+    path: result.shipping
+    value: '0.00'
+  - id: shp_trap-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_us_ca_goods
+  description: US_CA tax on GOODS is 7.25%
+  tags:
+  - tax
+  - us_ca
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-ca-goods
+      customer:
+        id: C-TAX-01
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-CA-G
+        category: GOODS
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_ca_g-noexc
+    type: no_exception
+    step: inv
+  - id: tax_ca_g-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '7.25'
+  - id: tax_ca_g-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_us_ca_digital
+  description: US_CA tax on DIGITAL items is 0% exempt
+  tags:
+  - tax
+  - us_ca
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-ca-dig
+      customer:
+        id: C-TAX-02
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-CA-D
+        category: DIGITAL
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_ca_d-noexc
+    type: no_exception
+    step: inv
+  - id: tax_ca_d-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '0.00'
+  - id: tax_ca_d-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_us_ca_essential
+  description: US_CA tax on ESSENTIAL items is 0% exempt
+  tags:
+  - tax
+  - us_ca
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-ca-ess
+      customer:
+        id: C-TAX-03
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-CA-E
+        category: ESSENTIAL
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_ca_e-noexc
+    type: no_exception
+    step: inv
+  - id: tax_ca_e-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '0.00'
+  - id: tax_ca_e-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_us_ny_goods
+  description: US_NY tax on GOODS is 8.875%
+  tags:
+  - tax
+  - us_ny
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-ny-goods
+      customer:
+        id: C-TAX-04
+        tier: RETAIL
+        region: US_NY
+      items:
+      - sku: SKU-NY-G
+        category: GOODS
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_ny_g-noexc
+    type: no_exception
+    step: inv
+  - id: tax_ny_g-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '8.88'
+  - id: tax_ny_g-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_us_ny_digital
+  description: US_NY tax on DIGITAL is 8.875%
+  tags:
+  - tax
+  - us_ny
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-ny-dig
+      customer:
+        id: C-TAX-05
+        tier: RETAIL
+        region: US_NY
+      items:
+      - sku: SKU-NY-D
+        category: DIGITAL
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_ny_d-noexc
+    type: no_exception
+    step: inv
+  - id: tax_ny_d-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '8.88'
+  - id: tax_ny_d-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_us_ny_essential
+  description: US_NY tax on ESSENTIAL is 0% exempt
+  tags:
+  - tax
+  - us_ny
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-ny-ess
+      customer:
+        id: C-TAX-06
+        tier: RETAIL
+        region: US_NY
+      items:
+      - sku: SKU-NY-E
+        category: ESSENTIAL
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_ny_e-noexc
+    type: no_exception
+    step: inv
+  - id: tax_ny_e-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '0.00'
+  - id: tax_ny_e-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_eu_de_goods
+  description: EU_DE tax on GOODS is 19%
+  tags:
+  - eu_de
+  - tax
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-de-goods
+      customer:
+        id: C-TAX-07
+        tier: RETAIL
+        region: EU_DE
+      items:
+      - sku: SKU-DE-G
+        category: GOODS
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_de_g-noexc
+    type: no_exception
+    step: inv
+  - id: tax_de_g-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '19.00'
+  - id: tax_de_g-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_eu_de_digital
+  description: EU_DE tax on DIGITAL is 19%
+  tags:
+  - eu_de
+  - tax
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-de-dig
+      customer:
+        id: C-TAX-08
+        tier: RETAIL
+        region: EU_DE
+      items:
+      - sku: SKU-DE-D
+        category: DIGITAL
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_de_d-noexc
+    type: no_exception
+    step: inv
+  - id: tax_de_d-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '19.00'
+  - id: tax_de_d-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_eu_de_essential
+  description: EU_DE tax on ESSENTIAL is 7%
+  tags:
+  - eu_de
+  - tax
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-de-ess
+      customer:
+        id: C-TAX-09
+        tier: RETAIL
+        region: EU_DE
+      items:
+      - sku: SKU-DE-E
+        category: ESSENTIAL
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_de_e-noexc
+    type: no_exception
+    step: inv
+  - id: tax_de_e-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '7.00'
+  - id: tax_de_e-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_uk_goods
+  description: UK tax on GOODS is 20%
+  tags:
+  - tax
+  - uk
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-uk-goods
+      customer:
+        id: C-TAX-10
+        tier: RETAIL
+        region: UK
+      items:
+      - sku: SKU-UK-G
+        category: GOODS
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_uk_g-noexc
+    type: no_exception
+    step: inv
+  - id: tax_uk_g-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '20.00'
+  - id: tax_uk_g-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_uk_digital
+  description: UK tax on DIGITAL is 20%
+  tags:
+  - tax
+  - uk
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-uk-dig
+      customer:
+        id: C-TAX-11
+        tier: RETAIL
+        region: UK
+      items:
+      - sku: SKU-UK-D
+        category: DIGITAL
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_uk_d-noexc
+    type: no_exception
+    step: inv
+  - id: tax_uk_d-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '20.00'
+  - id: tax_uk_d-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_uk_essential
+  description: UK tax on ESSENTIAL is 0% exempt
+  tags:
+  - tax
+  - uk
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-uk-ess
+      customer:
+        id: C-TAX-12
+        tier: RETAIL
+        region: UK
+      items:
+      - sku: SKU-UK-E
+        category: ESSENTIAL
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_uk_e-noexc
+    type: no_exception
+    step: inv
+  - id: tax_uk_e-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '0.00'
+  - id: tax_uk_e-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_export_all_categories
+  description: EXPORT tax is 0% across GOODS, DIGITAL, and ESSENTIAL
+  tags:
+  - export
+  - tax
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-exp-all
+      customer:
+        id: C-TAX-13
+        tier: RETAIL
+        region: EXPORT
+      items:
+      - sku: SKU-EX-G
+        category: GOODS
+        qty: 1
+        unit_price: '50.00'
+      - sku: SKU-EX-D
+        category: DIGITAL
+        qty: 1
+        unit_price: '50.00'
+      - sku: SKU-EX-E
+        category: ESSENTIAL
+        qty: 1
+        unit_price: '50.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_exp-noexc
+    type: no_exception
+    step: inv
+  - id: tax_exp-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '0.00'
+  - id: tax_exp-eq
+    type: invoice_total_equation
+    step: inv
+- id: tax_zero_subtotal_short_circuit
+  description: Zero subtotal short circuits tax calculation with empty breakdown
+  tags:
+  - tax
+  - validation
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-tax-zero
+      customer:
+        id: C-TAX-14
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-FREE
+        category: GOODS
+        qty: 1
+        unit_price: '0.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: tax_zero-noexc
+    type: no_exception
+    step: inv
+  - id: tax_zero-val
+    type: field_equals
+    step: inv
+    path: result.tax
+    value: '0.00'
+  - id: tax_zero-eq
+    type: invoice_total_equation
+    step: inv
+- id: rounding_multiline_proportional_residual
+  description: Multi-line proportional discount allocation using HALF_EVEN with final
+    line residual
+  tags:
+  - critical_boundary
+  - discount
+  - tax
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-rnd-multi
+      customer:
+        id: C-VIP-11
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-M1
+        category: GOODS
+        qty: 1
+        unit_price: '100.00'
+      - sku: SKU-M2
+        category: DIGITAL
+        qty: 1
+        unit_price: '150.00'
+      - sku: SKU-M3
+        category: GOODS
+        qty: 1
+        unit_price: '300.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: rnd_multi-noexc
+    type: no_exception
+    step: inv
+  - id: rnd_multi-eq
+    type: invoice_total_equation
+    step: inv
+- id: rounding_bankers_half_even_discount
+  description: Banker's rounding ROUND_HALF_EVEN tie-break on discount calculation
+    ($17.50 * 0.03 = 0.525 -> 0.52)
+  tags:
+  - critical_boundary
+  - discount
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-rnd-banker-1
+      customer:
+        id: C-VIP-12
+        tier: VIP
+        region: US_CA
+      items:
+      - sku: SKU-B1
+        category: DIGITAL
+        qty: 1
+        unit_price: '17.50'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: rnd_b1-noexc
+    type: no_exception
+    step: inv
+  - id: rnd_b1-disc
+    type: field_equals
+    step: inv
+    path: result.discount
+    value: '0.52'
+  - id: rnd_b1-eq
+    type: invoice_total_equation
+    step: inv
+- id: fee_card_below_1499_99
+  description: CARD payment with discounted subtotal immediately below $1500.00 incurs
+    $0.00 service fee
+  tags:
+  - critical_boundary
+  - service_fee
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-fee-card-1499
+      customer:
+        id: C-RET-08
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-FEE-1
+        qty: 1
+        unit_price: '1499.99'
+      payment_method: CARD
+  invariants:
+  - id: fee_card_1499-noexc
+    type: no_exception
+    step: inv
+  - id: fee_card_1499-fee
+    type: field_equals
+    step: inv
+    path: result.service_fee
+    value: '0.00'
+  - id: fee_card_1499-eq
+    type: invoice_total_equation
+    step: inv
+- id: fee_card_at_1500_00
+  description: CARD payment with discounted subtotal exactly at $1500.00 incurs 1.5%
+    service fee ($22.50)
+  tags:
+  - critical_boundary
+  - service_fee
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-fee-card-1500
+      customer:
+        id: C-RET-09
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-FEE-2
+        qty: 1
+        unit_price: '1500.00'
+      payment_method: CARD
+  invariants:
+  - id: fee_card_1500-noexc
+    type: no_exception
+    step: inv
+  - id: fee_card_1500-fee
+    type: field_equals
+    step: inv
+    path: result.service_fee
+    value: '22.50'
+  - id: fee_card_1500-eq
+    type: invoice_total_equation
+    step: inv
+- id: fee_card_above_1500_01
+  description: CARD payment with discounted subtotal immediately above $1500.00 incurs
+    1.5% service fee ($22.50)
+  tags:
+  - critical_boundary
+  - service_fee
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-fee-card-1500-01
+      customer:
+        id: C-RET-10
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-FEE-3
+        qty: 1
+        unit_price: '1500.01'
+      payment_method: CARD
+  invariants:
+  - id: fee_card_1500_01-noexc
+    type: no_exception
+    step: inv
+  - id: fee_card_1500_01-fee
+    type: field_equals
+    step: inv
+    path: result.service_fee
+    value: '22.50'
+  - id: fee_card_1500_01-eq
+    type: invoice_total_equation
+    step: inv
+- id: fee_bank_transfer_high_value
+  description: BANK_TRANSFER payment incurs $0.00 service fee even on high value $3000
+    order
+  tags:
+  - critical_boundary
+  - service_fee
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-fee-bank-3000
+      customer:
+        id: C-RET-11
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-FEE-4
+        qty: 1
+        unit_price: '3000.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: fee_bank_3000-noexc
+    type: no_exception
+    step: inv
+  - id: fee_bank_3000-fee
+    type: field_equals
+    step: inv
+    path: result.service_fee
+    value: '0.00'
+  - id: fee_bank_3000-eq
+    type: invoice_total_equation
+    step: inv
+- id: refund_full_window_0h
+  description: Refund requested at 0 hours is approved in full (0% fee)
+  tags:
+  - critical_boundary
+  - refund
+  - state_transition
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ref-inv-0h
+      customer:
+        id: C-REF-01
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-REF-1
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  - id: ref
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-act-0h
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 0
+  invariants:
+  - id: ref_0h-inv-noexc
+    type: no_exception
+    step: inv
+  - id: ref_0h-ref-noexc
+    type: no_exception
+    step: ref
+  - id: ref_0h-status
+    type: field_equals
+    step: ref
+    path: result.status
+    value: APPROVED
+  - id: ref_0h-fee-rate
+    type: field_equals
+    step: ref
+    path: result.fee_rate
+    value: '0.0000'
+  - id: ref_0h-fee
+    type: field_equals
+    step: ref
+    path: result.fee
+    value: '0.00'
+  - id: ref_0h-not-above
+    type: refund_not_above_invoice
+    step: ref
+    invoice_step: inv
+  - id: ref_0h-event
+    type: event_present
+    step: ref
+    event: REFUND_APPROVED
+- id: refund_full_window_24h
+  description: Refund requested exactly at 24 hours boundary is approved in full (0%
+    fee)
+  tags:
+  - critical_boundary
+  - refund
+  - state_transition
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ref-inv-24h
+      customer:
+        id: C-REF-02
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-REF-2
+        qty: 1
+        unit_price: '200.00'
+      payment_method: BANK_TRANSFER
+  - id: ref
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-act-24h
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 24
+  invariants:
+  - id: ref_24h-ref-noexc
+    type: no_exception
+    step: ref
+  - id: ref_24h-status
+    type: field_equals
+    step: ref
+    path: result.status
+    value: APPROVED
+  - id: ref_24h-fee-rate
+    type: field_equals
+    step: ref
+    path: result.fee_rate
+    value: '0.0000'
+  - id: ref_24h-fee
+    type: field_equals
+    step: ref
+    path: result.fee
+    value: '0.00'
+  - id: ref_24h-not-above
+    type: refund_not_above_invoice
+    step: ref
+    invoice_step: inv
+- id: refund_fee_window_25h
+  description: Refund requested at 25 hours (immediately above 24h) is approved with
+    5% fee
+  tags:
+  - critical_boundary
+  - refund
+  - state_transition
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ref-inv-25h
+      customer:
+        id: C-REF-03
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-REF-3
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  - id: ref
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-act-25h
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 25
+  invariants:
+  - id: ref_25h-ref-noexc
+    type: no_exception
+    step: ref
+  - id: ref_25h-status
+    type: field_equals
+    step: ref
+    path: result.status
+    value: APPROVED
+  - id: ref_25h-fee-rate
+    type: field_equals
+    step: ref
+    path: result.fee_rate
+    value: '0.0500'
+  - id: ref_25h-not-above
+    type: refund_not_above_invoice
+    step: ref
+    invoice_step: inv
+- id: refund_fee_window_72h
+  description: Refund requested exactly at 72 hours boundary is approved with 5% fee
+  tags:
+  - critical_boundary
+  - refund
+  - state_transition
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ref-inv-72h
+      customer:
+        id: C-REF-04
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-REF-4
+        qty: 1
+        unit_price: '300.00'
+      payment_method: BANK_TRANSFER
+  - id: ref
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-act-72h
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 72
+  invariants:
+  - id: ref_72h-ref-noexc
+    type: no_exception
+    step: ref
+  - id: ref_72h-status
+    type: field_equals
+    step: ref
+    path: result.status
+    value: APPROVED
+  - id: ref_72h-fee-rate
+    type: field_equals
+    step: ref
+    path: result.fee_rate
+    value: '0.0500'
+  - id: ref_72h-not-above
+    type: refund_not_above_invoice
+    step: ref
+    invoice_step: inv
+- id: refund_manual_review_73h
+  description: Refund requested at 73 hours enters MANUAL_REVIEW with 0.00 refund
+    amount
+  tags:
+  - critical_boundary
+  - refund
+  - state_transition
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ref-inv-73h
+      customer:
+        id: C-REF-05
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-REF-5
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  - id: ref
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-act-73h
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 73
+  invariants:
+  - id: ref_73h-ref-noexc
+    type: no_exception
+    step: ref
+  - id: ref_73h-status
+    type: field_equals
+    step: ref
+    path: result.status
+    value: MANUAL_REVIEW
+  - id: ref_73h-amount
+    type: field_equals
+    step: ref
+    path: result.refund_amount
+    value: '0.00'
+  - id: ref_73h-event
+    type: event_present
+    step: ref
+    event: REFUND_MANUAL_REVIEW
+- id: rounding_refund_fee_half_even
+  description: Refund fee calculation uses ROUND_HALF_EVEN banker's rounding ($50.10
+    * 0.05 = 2.505 -> $2.50)
+  tags:
+  - critical_boundary
+  - refund
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ref-rnd-5010
+      customer:
+        id: C-REF-06
+        tier: RETAIL
+        region: EXPORT
+      items:
+      - sku: SKU-REF-RND
+        category: GOODS
+        qty: 1
+        unit_price: '15.10'
+      payment_method: BANK_TRANSFER
+  - id: ref
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-rnd-act
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 48
+  invariants:
+  - id: ref_rnd-ref-noexc
+    type: no_exception
+    step: ref
+  - id: ref_rnd-fee
+    type: field_equals
+    step: ref
+    path: result.fee
+    value: '2.50'
+  - id: ref_rnd-not-above
+    type: refund_not_above_invoice
+    step: ref
+    invoice_step: inv
+- id: refund_duplicate_approved_rejected
+  description: Second independent refund request for already-approved refund raises
+    REFUND_ALREADY_PROCESSED
+  tags:
+  - refund
+  - state_transition
+  - validation
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ref-dup-inv
+      customer:
+        id: C-REF-07
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-DUP-1
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  - id: ref1
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-dup-1
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 10
+  - id: ref2
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-dup-2
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 10
+  invariants:
+  - id: ref_dup-1-noexc
+    type: no_exception
+    step: ref1
+  - id: ref_dup-2-exc
+    type: exception_code
+    step: ref2
+    code: REFUND_ALREADY_PROCESSED
+- id: refund_after_manual_review_allowed
+  description: A subsequent refund request under a new operation_id is allowed after
+    a previous MANUAL_REVIEW
+  tags:
+  - refund
+  - state_transition
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-ref-mr-inv
+      customer:
+        id: C-REF-08
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-MR-1
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  - id: ref_mr
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-mr-1
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 80
+  - id: ref_appr
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-mr-2
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 12
+  invariants:
+  - id: ref_mr-noexc
+    type: no_exception
+    step: ref_mr
+  - id: ref_mr-status
+    type: field_equals
+    step: ref_mr
+    path: result.status
+    value: MANUAL_REVIEW
+  - id: ref_appr-noexc
+    type: no_exception
+    step: ref_appr
+  - id: ref_appr-status
+    type: field_equals
+    step: ref_appr
+    path: result.status
+    value: APPROVED
+- id: idempotency_invoice_exact_replay
+  description: Repeating create_invoice with identical operation_id returns cached
+    result without duplicating state
+  tags:
+  - idempotency
+  steps:
+  - id: step1
+    operation: create_invoice
+    input:
+      operation_id: op-idem-inv-1
+      customer:
+        id: C-IDEM-01
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-IDEM-1
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  - id: step2
+    operation: create_invoice
+    input:
+      operation_id: op-idem-inv-1
+      customer:
+        id: C-IDEM-01
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-IDEM-1
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  invariants:
+  - id: idem_inv-noexc1
+    type: no_exception
+    step: step1
+  - id: idem_inv-noexc2
+    type: no_exception
+    step: step2
+  - id: idem_inv-same
+    type: same_result
+    step: step1
+    other_step: step2
+  - id: idem_inv-state
+    type: state_unchanged_between_steps
+    step: step1
+    other_step: step2
+  - id: idem_inv-noevents
+    type: no_new_events
+    step: step2
+- id: idempotency_invoice_tampered_payload
+  description: Repeating create_invoice with same operation_id but tampered payload
+    returns original cached result
+  tags:
+  - idempotency
+  steps:
+  - id: step1
+    operation: create_invoice
+    input:
+      operation_id: op-idem-inv-2
+      customer:
+        id: C-IDEM-02
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-IDEM-2
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  - id: step2
+    operation: create_invoice
+    input:
+      operation_id: op-idem-inv-2
+      customer:
+        id: C-IDEM-TAMPER
+        tier: VIP
+        region: US_NY
+      items:
+      - sku: SKU-TAMPER
+        qty: 10
+        unit_price: '500.00'
+      payment_method: CARD
+  invariants:
+  - id: idem_tamp-same
+    type: same_result
+    step: step1
+    other_step: step2
+  - id: idem_tamp-state
+    type: state_unchanged_between_steps
+    step: step1
+    other_step: step2
+- id: idempotency_refund_exact_replay
+  description: Repeating refund_invoice with identical operation_id returns cached
+    result without duplicating state
+  tags:
+  - idempotency
+  - refund
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-idem-ref-inv
+      customer:
+        id: C-IDEM-03
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-IDEM-3
+        qty: 1
+        unit_price: '100.00'
+      payment_method: BANK_TRANSFER
+  - id: ref1
+    operation: refund_invoice
+    input:
+      operation_id: op-idem-ref-act
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 10
+  - id: ref2
+    operation: refund_invoice
+    input:
+      operation_id: op-idem-ref-act
+      invoice_id: $steps.inv.result.invoice_id
+      hours_since_purchase: 10
+  invariants:
+  - id: idem_ref-same
+    type: same_result
+    step: ref1
+    other_step: ref2
+  - id: idem_ref-state
+    type: state_unchanged_between_steps
+    step: ref1
+    other_step: ref2
+  - id: idem_ref-noevents
+    type: no_new_events
+    step: ref2
+- id: val_unsupported_operation
+  description: Unsupported operation 'process_refund' raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: process_refund
+    input:
+      operation_id: op-unsupported
+  invariants:
+  - id: val_unsupported-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_missing_operation_id
+  description: Missing operation_id in create_invoice raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      customer:
+        id: C-VAL-01
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-V1
+        qty: 1
+        unit_price: '10.00'
+  invariants:
+  - id: val_miss_op-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_missing_customer_id
+  description: Missing customer.id in create_invoice raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-cust-id
+      customer:
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-V2
+        qty: 1
+        unit_price: '10.00'
+  invariants:
+  - id: val_miss_cust-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_suspended_customer
+  description: Customer with status SUSPENDED raises ACCOUNT_SUSPENDED
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-susp
+      customer:
+        id: C-SUSP
+        tier: RETAIL
+        region: US_CA
+        status: SUSPENDED
+      items:
+      - sku: SKU-V3
+        qty: 1
+        unit_price: '10.00'
+  invariants:
+  - id: val_susp-exc
+    type: exception_code
+    step: step
+    code: ACCOUNT_SUSPENDED
+- id: val_unknown_customer_tier
+  description: Unknown customer tier 'PLATINUM' raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-tier
+      customer:
+        id: C-TIER
+        tier: PLATINUM
+        region: US_CA
+      items:
+      - sku: SKU-V4
+        qty: 1
+        unit_price: '10.00'
+  invariants:
+  - id: val_tier-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_unknown_region
+  description: Unknown region 'ASIA_JP' raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-reg
+      customer:
+        id: C-REG
+        tier: RETAIL
+        region: ASIA_JP
+      items:
+      - sku: SKU-V5
+        qty: 1
+        unit_price: '10.00'
+  invariants:
+  - id: val_reg-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_empty_items
+  description: Empty items list in create_invoice raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-items
+      customer:
+        id: C-ITEMS
+        tier: RETAIL
+        region: US_CA
+      items: []
+  invariants:
+  - id: val_items-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_item_missing_sku
+  description: Item with missing or empty sku raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-sku
+      customer:
+        id: C-SKU
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: ''
+        qty: 1
+        unit_price: '10.00'
+  invariants:
+  - id: val_sku-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_item_unknown_category
+  description: Item with unknown category 'SOFTWARE' raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-cat
+      customer:
+        id: C-CAT
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-CAT
+        category: SOFTWARE
+        qty: 1
+        unit_price: '10.00'
+  invariants:
+  - id: val_cat-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_item_zero_qty
+  description: Item with quantity 0 raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-qty0
+      customer:
+        id: C-QTY0
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-Q0
+        qty: 0
+        unit_price: '10.00'
+  invariants:
+  - id: val_qty0-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_item_negative_qty
+  description: Item with negative quantity -1 raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-qtyneg
+      customer:
+        id: C-QTYNEG
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-QN
+        qty: -1
+        unit_price: '10.00'
+  invariants:
+  - id: val_qtyneg-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_item_negative_price
+  description: Item with negative unit_price '-5.00' raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-priceneg
+      customer:
+        id: C-PRICENEG
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-PN
+        qty: 1
+        unit_price: '-5.00'
+  invariants:
+  - id: val_priceneg-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_unknown_coupon
+  description: Unknown coupon code 'BLACKFRIDAY' raises VALIDATION_ERROR
+  tags:
+  - coupon
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-cpn
+      customer:
+        id: C-CPN
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-CPN-X
+        qty: 1
+        unit_price: '50.00'
+      coupon: BLACKFRIDAY
+  invariants:
+  - id: val_cpn-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_unknown_payment_method
+  description: Unknown payment_method 'CRYPTO' raises VALIDATION_ERROR
+  tags:
+  - validation
+  steps:
+  - id: step
+    operation: create_invoice
+    input:
+      operation_id: op-val-pay
+      customer:
+        id: C-PAY
+        tier: RETAIL
+        region: US_CA
+      items:
+      - sku: SKU-PAY
+        qty: 1
+        unit_price: '50.00'
+      payment_method: CRYPTO
+  invariants:
+  - id: val_pay-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_refund_missing_op_id
+  description: Missing operation_id in refund_invoice raises VALIDATION_ERROR
+  tags:
+  - refund
+  - validation
+  steps:
+  - id: step
+    operation: refund_invoice
+    input:
+      invoice_id: INV-12345
+      hours_since_purchase: 10
+  invariants:
+  - id: val_ref_op-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_refund_missing_invoice_id
+  description: Missing invoice_id in refund_invoice raises VALIDATION_ERROR
+  tags:
+  - refund
+  - validation
+  steps:
+  - id: step
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-miss-inv
+      hours_since_purchase: 10
+  invariants:
+  - id: val_ref_inv-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_refund_negative_hours
+  description: Negative hours_since_purchase -1 raises VALIDATION_ERROR
+  tags:
+  - refund
+  - validation
+  steps:
+  - id: step
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-neg-hrs
+      invoice_id: INV-12345
+      hours_since_purchase: -1
+  invariants:
+  - id: val_ref_hrs-exc
+    type: exception_code
+    step: step
+    code: VALIDATION_ERROR
+- id: val_refund_invoice_not_found
+  description: Refunding non-existent invoice raises INVOICE_NOT_FOUND
+  tags:
+  - refund
+  - validation
+  steps:
+  - id: step
+    operation: refund_invoice
+    input:
+      operation_id: op-ref-notfound
+      invoice_id: INV-DOESNOTEXIST
+      hours_since_purchase: 10
+  invariants:
+  - id: val_ref_notfound-exc
+    type: exception_code
+    step: step
+    code: INVOICE_NOT_FOUND
+- id: default_values_customer_and_item
+  description: Verify default tier (RETAIL), default status (ACTIVE), default category
+    (GOODS), and default payment_method (CARD)
+  tags:
+  - default_values
+  steps:
+  - id: inv
+    operation: create_invoice
+    input:
+      operation_id: op-defaults-1
+      customer:
+        id: C-DEF-01
+        region: US_CA
+      items:
+      - sku: SKU-DEF-1
+        qty: 1
+        unit_price: '50.00'
+  invariants:
+  - id: def_val-noexc
+    type: no_exception
+    step: inv
+  - id: def_val-tier
+    type: field_equals
+    step: inv
+    path: result.tier
+    value: RETAIL
+  - id: def_val-pay
+    type: field_equals
+    step: inv
+    path: result.payment_method
+    value: CARD
+  - id: def_val-eq
+    type: invoice_total_equation
+    step: inv

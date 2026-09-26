@@ -1,0 +1,29 @@
+{
+  "aegis_certificate_version": "2.0",
+  "contract_version": "2.0",
+  "generated_at_utc": "2026-09-26T15:23:08.159111+00:00",
+  "scenario_count": 86,
+  "workflow_step_count": 100,
+  "invariant_count": 231,
+  "candidate_invariant_failures": 0,
+  "statement_coverage": 100.0,
+  "branch_coverage": 98.96,
+  "cases_matched": 86,
+  "cases_drifted": 0,
+  "behavioral_verdict": "ACCEPTED",
+  "gauntlet": {
+    "seeded_regressions": 21,
+    "detected": 21,
+    "escaped": 0,
+    "validation": "PASS"
+  },
+  "architecture_checks": {
+    "modern_has_no_legacy_imports": true,
+    "modern_has_no_cycles": true,
+    "largest_module_reduced": true
+  },
+  "baseline_evidence_sha256": "2fd2c2f96614e5bcf8fa807b5c1b777fc702f53707be047ddf01c5a852680da7",
+  "candidate_evidence_sha256": "d919b4055c09e30ee9654d92e302aa64c46195716d53525d57023e1430216c99",
+  "scope": "Acceptance establishes behavioral equivalence across the defined contract and executed scenario corpus. It is not a formal proof of complete program equivalence.",
+  "certificate_sha256": "d9131baae477a9133b3b8484c6b26e81ff71c40454ca48b6723e2b6b3b2820e7"
+}

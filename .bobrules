@@ -1,0 +1,26 @@
+AEGIS MODERNIZATION GOVERNANCE
+
+1. Never modify legacy_app during modernization.
+
+2. Never alter a recorded baseline because modern code fails.
+
+3. Never weaken, remove, bypass, or special-case the Aegis contract to make candidate code pass.
+
+4. Never modify Aegis comparison logic merely to eliminate a failing difference.
+
+5. Any behavioral drift is BLOCKING until resolved or explicitly approved by a human as an intended behavior change.
+
+6. Fix candidate code rather than verifier evidence.
+
+7. Make the smallest safe candidate-side repair responsible for the observed counterexample.
+
+8. modern_app must not import or delegate business logic to legacy_app.
+
+9. Preserve externally observable behavior unless a human explicitly approves a contract change.
+
+10. Do not claim mathematical proof, formal proof, guaranteed safety, complete program equivalence, or enterprise certification.
+
+11. Correct wording is:
+    "Behavioral equivalence demonstrated across the defined contract and executed scenario corpus."
+
+12. Every major decision should leave an auditable repository artifact.
