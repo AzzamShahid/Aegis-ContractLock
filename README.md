@@ -339,6 +339,42 @@ The hardened public package modernizes the billing monolith into an isolated mod
 
 ---
 
+## One-Command Judge Verification
+
+After installing the dependencies, a judge can validate the complete hardened submission with one command:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\verify_submission.ps1
+```
+
+`verify_submission.ps1` runs all six submission gates:
+
+```text
+Engine tests
+Contract coverage
+Behavioral equality
+Architecture integrity
+Mutation gauntlet
+Evidence readiness
+```
+
+Expected final result:
+
+```text
+Engine tests               PASS
+Contract coverage          PASS
+Behavioral equality        PASS
+Architecture               PASS
+Mutation gauntlet          PASS
+Evidence readiness         PASS
+------------------------------------------------------------
+FINAL: READY
+```
+
+The script temporarily backs up generated evidence artifacts and restores them after verification, so running the judge check does not permanently rewrite the sealed submission evidence.
+
+---
 ## Reproduction Commands
 
 ### Environment
@@ -405,7 +441,7 @@ python -m aegis.cli readiness
 ```
 *Expected:*
 ```text
-READY — SELF-CONTAINED EVIDENCE PACKAGE PASSED
+SUBMISSION READINESS: READY
 ```
 
 ---
@@ -528,6 +564,7 @@ Aegis-ContractLock/
 │
 ├── aegis_contract.yaml             # Hardened 86-case contract
 ├── requirements.txt
+├── verify_submission.ps1           # One-command submission verification
 ├── .bobrules
 ├── .gitignore
 ├── THIRD_PARTY_NOTICES.md

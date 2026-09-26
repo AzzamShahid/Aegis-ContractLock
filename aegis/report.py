@@ -15,7 +15,7 @@ def render_text(
     width = 68
     lines = []
     lines.append("=" * width)
-    lines.append("AEGIS CONTRACTLOCK — MODERNIZATION VERDICT")
+    lines.append("AEGIS CONTRACTLOCK - MODERNIZATION VERDICT")
     lines.append("=" * width)
     lines.append(f"Cases matched : {comparison['matched']} / {comparison['case_count']}")
     lines.append(f"Cases drifted : {comparison['drifted']}")
@@ -28,7 +28,7 @@ def render_text(
         ce = comparison["minimal_counterexample"]
         lines.append("")
         lines.append("-" * width)
-        lines.append("MINIMAL COUNTEREXAMPLE")
+        lines.append("BEHAVIORAL COUNTEREXAMPLE")
         lines.append("-" * width)
         lines.append(f"Case: {ce['case_id']}")
         for diff in ce["diffs"][:12]:
@@ -74,7 +74,7 @@ def render_markdown(
         ce = comparison["minimal_counterexample"]
         out += [
             "",
-            "## Minimal Counterexample",
+            "## Behavioral Counterexample",
             "",
             f"**Case:** `{ce['case_id']}`",
             "",
