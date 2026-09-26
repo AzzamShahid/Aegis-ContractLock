@@ -1,0 +1,77 @@
+{
+  "scenario_count": 47,
+  "workflow_step_count": 60,
+  "invariant_count": 183,
+  "statement_coverage": 96.65,
+  "branch_coverage": 91.67,
+  "covered_statements": 202,
+  "total_statements": 209,
+  "covered_branches": 88,
+  "total_branches": 96,
+  "missing_lines": [
+    74,
+    110,
+    130,
+    132,
+    295,
+    371,
+    373
+  ],
+  "missing_branches": [
+    [
+      72,
+      74
+    ],
+    [
+      109,
+      110
+    ],
+    [
+      129,
+      130
+    ],
+    [
+      131,
+      132
+    ],
+    [
+      294,
+      295
+    ],
+    [
+      344,
+      347
+    ],
+    [
+      370,
+      371
+    ],
+    [
+      372,
+      373
+    ]
+  ],
+  "tag_counts": {
+    "coupon": 5,
+    "critical_boundary": 30,
+    "idempotency": 3,
+    "multiline": 1,
+    "refund": 10,
+    "service_fee": 4,
+    "shipping": 5,
+    "state_transition": 4,
+    "stepped_tier_discounts": 11,
+    "tax": 9,
+    "tier_business": 4,
+    "tier_retail": 1,
+    "tier_vip": 4,
+    "validation": 12
+  },
+  "required_tags_missing": [],
+  "baseline_invariant_failures": 0,
+  "thresholds": {
+    "statement": 95.0,
+    "branch": 90.0
+  },
+  "contract_readiness": "READY"
+}

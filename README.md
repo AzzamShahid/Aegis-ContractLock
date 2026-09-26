@@ -7,7 +7,7 @@
 [![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-98.96%25-brightgreen)](reports/contract-coverage.md)
 [![Regression Gauntlet](https://img.shields.io/badge/Regression%20Gauntlet-21%2F21%20Blocked-blue)](reports/gauntlet-report.md)
 [![Modern Architecture](https://img.shields.io/badge/Modern%20Architecture-11%20Modules-informational)](reports/architecture-comparison.md)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
@@ -200,7 +200,8 @@ Aegis-ContractLock/
 ├── requirements.txt                # Minimal external dependencies (PyYAML, pytest)
 ├── .bobrules                       # System instructions governing AI agents
 ├── .gitignore                      # Git ignore configuration
-├── LICENSE                         # Apache 2.0 Open Source License
+├── THIRD_PARTY_NOTICES.md          # Third-party dependency licenses
+├── LICENSE                         # MIT License
 └── README.md                       # This document
 ```
 
@@ -275,4 +276,6 @@ python -m aegis.cli architecture
 
 ## License
 
-This project is licensed under the [Apache License 2.0](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
+
+

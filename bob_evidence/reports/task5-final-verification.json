@@ -1,0 +1,249 @@
+{
+  "comparison": {
+    "verdict": "ACCEPTED",
+    "case_count": 47,
+    "matched": 47,
+    "drifted": 0,
+    "cases": [
+      {
+        "case_id": "business_below_1000_0pct",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "business_below_2000_4pct",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "business_exact_1000_4pct",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "business_exact_2000_6pct",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_fixed25_above_threshold",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_fixed25_below_threshold",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_welcome10_at_cap",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "coupon_welcome10_below_cap",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "idempotency_create_invoice",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "idempotency_refund_invoice",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "multiline_vip_usny_mixed_categories",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_at_24h_full_no_fee",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_at_25h_5pct_fee",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_at_72h_5pct_fee",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_at_73h_manual_review",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_duplicate_approved_blocked",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "refund_manual_review_then_approved",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "retail_basic_usca_goods",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "service_fee_bank_transfer_never",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "service_fee_card_below_threshold",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "service_fee_card_exact_threshold",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_eu_free_exact_threshold",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_export_always_35",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_us_free_exact_threshold",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "shipping_us_paid_below_threshold",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_eude_essential_reduced_rate",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_export_zero",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_uk_goods_20pct",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_usca_essential_exempt",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_usca_goods_taxed_digital_exempt",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "tax_usny_digital_taxed",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_empty_items",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_invalid_payment_method",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_invalid_region",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_invalid_tier",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_missing_operation_id",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_negative_unit_price",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_refund_invoice_not_found",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_refund_negative_hours",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_suspended_customer",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_unknown_coupon",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "validation_zero_qty",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "vip_below_1000_7pct",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "vip_below_500_3pct",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "vip_exact_1000_10pct",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "vip_exact_500_7pct",
+        "status": "MATCH",
+        "diffs": []
+      },
+      {
+        "case_id": "workflow_invoice_then_full_refund",
+        "status": "MATCH",
+        "diffs": []
+      }
+    ],
+    "minimal_counterexample": null
+  },
+  "baseline_evidence_sha256": "2d9d6ef6b3e1d972e0cf68c504083f239391e1becb939c6726fabdad6d906db5",
+  "candidate_evidence_sha256": "f6c79144ab8592e71b459be6729ff774740922c15207397c75950773a4e321cf",
+  "candidate_factory": "modern_app.billing.api:create_service"
+}

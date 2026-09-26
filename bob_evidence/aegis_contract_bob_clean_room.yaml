@@ -1,0 +1,2016 @@
+version: '2.0'
+metadata:
+  name: Aegis ContractLock Billing Behavioral Contract V2
+  purpose: Evidence-gated legacy modernization with measurable behavioral coverage
+subject:
+  legacy_factory: legacy_app.billing.monolith:create_service
+  candidate_factory: modern_app.billing.api:create_service
+readiness:
+  statement_coverage_min: 95.0
+  branch_coverage_min: 90.0
+  critical_tags:
+    - critical_boundary
+    - validation
+    - refund
+    - idempotency
+    - tax
+outputs:
+  baseline: baseline/baseline.json
+  candidate_evidence: reports/candidate-evidence.json
+  verification_json: reports/verification.json
+  verification_md: reports/verification.md
+  coverage_json: reports/contract-coverage.json
+  coverage_md: reports/contract-coverage.md
+  gauntlet_json: reports/gauntlet-report.json
+  gauntlet_md: reports/gauntlet-report.md
+  architecture_json: reports/architecture-comparison.json
+  architecture_md: reports/architecture-comparison.md
+  certificate_json: reports/evidence-certificate.json
+  certificate_md: reports/evidence-certificate.md
+  dashboard_html: reports/dashboard.html
+  readiness_json: reports/readiness.json
+  readiness_md: reports/readiness.md
+
+cases:
+
+  # ─────────────────────────────────────────────────────────────────
+  # RETAIL TIER — baseline, no discount
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: retail_basic_usca_goods
+    description: RETAIL customer, US_CA, single GOODS item below shipping threshold — 0% discount, 7.25% tax, $12 shipping
+    tags:
+      - tier_retail
+      - tax
+      - shipping
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-retail-basic
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+    invariants:
+      - id: retail_basic-noexc
+        type: no_exception
+        step: invoice
+      - id: retail_basic-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: retail_basic-discount_rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.0000'
+      - id: retail_basic-grand_total
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '119.25'
+      - id: retail_basic-shipping
+        type: field_equals
+        step: invoice
+        path: result.shipping
+        value: '12.00'
+      - id: retail_basic-tax
+        type: field_equals
+        step: invoice
+        path: result.tax
+        value: '7.25'
+      - id: retail_basic-status
+        type: field_equals
+        step: invoice
+        path: result.status
+        value: OPEN
+      - id: retail_basic-ledger
+        type: state_table_delta
+        step: invoice
+        table: ledger
+        delta: 1
+      - id: retail_basic-audit_event
+        type: event_present
+        step: invoice
+        event: INVOICE_CREATED
+
+  # ─────────────────────────────────────────────────────────────────
+  # VIP STEPPED TIER DISCOUNTS — boundaries
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: vip_below_500_3pct
+    description: VIP stepped tier discount — subtotal 499.99 is below 500.00 threshold, applies 3%
+    tags:
+      - tier_vip
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-vip-499
+          customer:
+            id: C-VIP-01
+            tier: VIP
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '499.99'
+          payment_method: CARD
+    invariants:
+      - id: vip_499-noexc
+        type: no_exception
+        step: invoice
+      - id: vip_499-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: vip_499-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.0300'
+      - id: vip_499-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '520.15'
+
+  - id: vip_exact_500_7pct
+    description: VIP stepped tier discount — subtotal exactly 500.00 steps up to 7% (inclusive boundary)
+    tags:
+      - tier_vip
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-vip-500
+          customer:
+            id: C-VIP-01
+            tier: VIP
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '500.00'
+          payment_method: CARD
+    invariants:
+      - id: vip_500-noexc
+        type: no_exception
+        step: invoice
+      - id: vip_500-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: vip_500-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.0700'
+      - id: vip_500-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '498.71'
+
+  - id: vip_below_1000_7pct
+    description: VIP stepped tier discount — subtotal 999.99 is below 1000.00 threshold, stays at 7%
+    tags:
+      - tier_vip
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-vip-999
+          customer:
+            id: C-VIP-01
+            tier: VIP
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '999.99'
+          payment_method: CARD
+    invariants:
+      - id: vip_999-noexc
+        type: no_exception
+        step: invoice
+      - id: vip_999-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: vip_999-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.0700'
+      - id: vip_999-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '997.41'
+
+  - id: vip_exact_1000_10pct
+    description: VIP stepped tier discount — subtotal exactly 1000.00 steps up to 10% (inclusive boundary)
+    tags:
+      - tier_vip
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-vip-1000
+          customer:
+            id: C-VIP-01
+            tier: VIP
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '1000.00'
+          payment_method: CARD
+    invariants:
+      - id: vip_1000-noexc
+        type: no_exception
+        step: invoice
+      - id: vip_1000-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: vip_1000-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.1000'
+      - id: vip_1000-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '965.25'
+
+  # ─────────────────────────────────────────────────────────────────
+  # BUSINESS STEPPED TIER DISCOUNTS — boundaries
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: business_below_1000_0pct
+    description: BUSINESS stepped tier discount — subtotal 999.99 below 1000 threshold, 0% discount
+    tags:
+      - tier_business
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-biz-999
+          customer:
+            id: C-BIZ-01
+            tier: BUSINESS
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '999.99'
+          payment_method: CARD
+    invariants:
+      - id: biz_999-noexc
+        type: no_exception
+        step: invoice
+      - id: biz_999-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: biz_999-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.0000'
+      - id: biz_999-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '1072.49'
+
+  - id: business_exact_1000_4pct
+    description: BUSINESS stepped tier discount — subtotal exactly 1000.00 steps to 4% (inclusive boundary)
+    tags:
+      - tier_business
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-biz-1000
+          customer:
+            id: C-BIZ-01
+            tier: BUSINESS
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '1000.00'
+          payment_method: CARD
+    invariants:
+      - id: biz_1000-noexc
+        type: no_exception
+        step: invoice
+      - id: biz_1000-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: biz_1000-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.0400'
+      - id: biz_1000-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '1029.60'
+
+  - id: business_below_2000_4pct
+    description: BUSINESS stepped tier discount — subtotal 1999.99 below 2000 threshold, stays at 4%
+    tags:
+      - tier_business
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-biz-1999
+          customer:
+            id: C-BIZ-01
+            tier: BUSINESS
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '1999.99'
+          payment_method: CARD
+    invariants:
+      - id: biz_1999-noexc
+        type: no_exception
+        step: invoice
+      - id: biz_1999-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: biz_1999-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.0400'
+      - id: biz_1999-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '2087.99'
+
+  - id: business_exact_2000_6pct
+    description: BUSINESS stepped tier discount — subtotal exactly 2000.00 steps to 6% with CARD service fee
+    tags:
+      - tier_business
+      - stepped_tier_discounts
+      - critical_boundary
+      - service_fee
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-biz-2000
+          customer:
+            id: C-BIZ-01
+            tier: BUSINESS
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '2000.00'
+          payment_method: CARD
+    invariants:
+      - id: biz_2000-noexc
+        type: no_exception
+        step: invoice
+      - id: biz_2000-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: biz_2000-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.0600'
+      - id: biz_2000-fee
+        type: field_equals
+        step: invoice
+        path: result.service_fee
+        value: '28.20'
+      - id: biz_2000-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '2044.50'
+
+  # ─────────────────────────────────────────────────────────────────
+  # COUPON BEHAVIOR
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: coupon_welcome10_below_cap
+    description: WELCOME10 adds 10pp to VIP 3% base, result 13% — below 15% cap
+    tags:
+      - coupon
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-vip-welcome-low
+          customer:
+            id: C-VIP-01
+            tier: VIP
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '400.00'
+          payment_method: CARD
+          coupon: WELCOME10
+    invariants:
+      - id: welcome_low-noexc
+        type: no_exception
+        step: invoice
+      - id: welcome_low-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: welcome_low-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.1300'
+      - id: welcome_low-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '373.23'
+
+  - id: coupon_welcome10_at_cap
+    description: WELCOME10 adds 10pp to VIP 7% base, result capped at 15% (not 17%)
+    tags:
+      - coupon
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-vip-welcome-cap
+          customer:
+            id: C-VIP-01
+            tier: VIP
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '600.00'
+          payment_method: CARD
+          coupon: WELCOME10
+    invariants:
+      - id: welcome_cap-noexc
+        type: no_exception
+        step: invoice
+      - id: welcome_cap-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: welcome_cap-rate
+        type: field_equals
+        step: invoice
+        path: result.discount_rate
+        value: '0.1500'
+      - id: welcome_cap-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '546.98'
+
+  - id: coupon_fixed25_above_threshold
+    description: FIXED25 deducts 25.00 when subtotal >= 250.00
+    tags:
+      - coupon
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-retail-fixed25
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '300.00'
+          payment_method: CARD
+          coupon: FIXED25
+    invariants:
+      - id: fixed25_above-noexc
+        type: no_exception
+        step: invoice
+      - id: fixed25_above-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: fixed25_above-discount
+        type: field_equals
+        step: invoice
+        path: result.discount
+        value: '25.00'
+      - id: fixed25_above-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '294.94'
+
+  - id: coupon_fixed25_below_threshold
+    description: FIXED25 silently not applied when subtotal < 250.00 — no error, discount stays 0
+    tags:
+      - coupon
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-retail-fixed25-no
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '200.00'
+          payment_method: CARD
+          coupon: FIXED25
+    invariants:
+      - id: fixed25_below-noexc
+        type: no_exception
+        step: invoice
+      - id: fixed25_below-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: fixed25_below-discount
+        type: field_equals
+        step: invoice
+        path: result.discount
+        value: '0.00'
+      - id: fixed25_below-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '214.50'
+
+  # ─────────────────────────────────────────────────────────────────
+  # SHIPPING THRESHOLDS
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: shipping_us_free_exact_threshold
+    description: US_CA shipping free at exactly 150.00 pre-discount subtotal (inclusive boundary)
+    tags:
+      - shipping
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-ship-us-free
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '150.00'
+          payment_method: CARD
+    invariants:
+      - id: ship_us_free-noexc
+        type: no_exception
+        step: invoice
+      - id: ship_us_free-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: ship_us_free-shipping
+        type: field_equals
+        step: invoice
+        path: result.shipping
+        value: '0.00'
+
+  - id: shipping_us_paid_below_threshold
+    description: US_NY shipping 12.00 when subtotal 149.99 (one cent below free threshold); shipping uses pre-discount subtotal
+    tags:
+      - shipping
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-ship-us-paid
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_NY
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '149.99'
+          payment_method: CARD
+    invariants:
+      - id: ship_us_paid-noexc
+        type: no_exception
+        step: invoice
+      - id: ship_us_paid-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: ship_us_paid-shipping
+        type: field_equals
+        step: invoice
+        path: result.shipping
+        value: '12.00'
+
+  - id: shipping_eu_free_exact_threshold
+    description: EU_DE shipping free at exactly 250.00 pre-discount subtotal
+    tags:
+      - shipping
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-ship-eu-free
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: EU_DE
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '250.00'
+          payment_method: CARD
+    invariants:
+      - id: ship_eu_free-noexc
+        type: no_exception
+        step: invoice
+      - id: ship_eu_free-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: ship_eu_free-shipping
+        type: field_equals
+        step: invoice
+        path: result.shipping
+        value: '0.00'
+
+  - id: shipping_export_always_35
+    description: EXPORT region always charges 35.00 shipping regardless of subtotal
+    tags:
+      - shipping
+      - tax
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-ship-export
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: EXPORT
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '500.00'
+          payment_method: CARD
+    invariants:
+      - id: ship_export-noexc
+        type: no_exception
+        step: invoice
+      - id: ship_export-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: ship_export-shipping
+        type: field_equals
+        step: invoice
+        path: result.shipping
+        value: '35.00'
+      - id: ship_export-tax
+        type: field_equals
+        step: invoice
+        path: result.tax
+        value: '0.00'
+
+  # ─────────────────────────────────────────────────────────────────
+  # SERVICE FEE
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: service_fee_card_below_threshold
+    description: CARD payment with discounted subtotal 1440.00 (below 1500 threshold) — no service fee
+    tags:
+      - service_fee
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-svcfee-below
+          customer:
+            id: C-VIP-01
+            tier: VIP
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '1600.00'
+          payment_method: CARD
+    invariants:
+      - id: svcfee_below-noexc
+        type: no_exception
+        step: invoice
+      - id: svcfee_below-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: svcfee_below-fee
+        type: field_equals
+        step: invoice
+        path: result.service_fee
+        value: '0.00'
+
+  - id: service_fee_card_exact_threshold
+    description: CARD payment with discounted subtotal exactly 1500.00 — 1.5% fee applies (HALF_UP)
+    tags:
+      - service_fee
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-svcfee-exact
+          customer:
+            id: C-BIZ-01
+            tier: BUSINESS
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '1562.50'
+          payment_method: CARD
+    invariants:
+      - id: svcfee_exact-noexc
+        type: no_exception
+        step: invoice
+      - id: svcfee_exact-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: svcfee_exact-discount
+        type: field_equals
+        step: invoice
+        path: result.discount
+        value: '62.50'
+      - id: svcfee_exact-fee
+        type: field_equals
+        step: invoice
+        path: result.service_fee
+        value: '22.50'
+      - id: svcfee_exact-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '1631.25'
+
+  - id: service_fee_bank_transfer_never
+    description: BANK_TRANSFER payment never incurs service fee even at high subtotal
+    tags:
+      - service_fee
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-svcfee-bank
+          customer:
+            id: C-BIZ-01
+            tier: BUSINESS
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '2000.00'
+          payment_method: BANK_TRANSFER
+    invariants:
+      - id: svcfee_bank-noexc
+        type: no_exception
+        step: invoice
+      - id: svcfee_bank-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: svcfee_bank-fee
+        type: field_equals
+        step: invoice
+        path: result.service_fee
+        value: '0.00'
+      - id: svcfee_bank-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '2016.30'
+
+  # ─────────────────────────────────────────────────────────────────
+  # TAX RULES — by region and category
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: tax_usca_goods_taxed_digital_exempt
+    description: US_CA — GOODS taxed at 7.25%; DIGITAL is exempt
+    tags:
+      - tax
+      - critical_boundary
+    steps:
+      - id: inv_goods
+        operation: create_invoice
+        input:
+          operation_id: op-tax-usca-goods
+          customer:
+            id: C-TAX-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-GOODS
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+      - id: inv_digital
+        operation: create_invoice
+        input:
+          operation_id: op-tax-usca-digital
+          customer:
+            id: C-TAX-02
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-DIG
+              category: DIGITAL
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+    invariants:
+      - id: usca_goods-noexc
+        type: no_exception
+        step: inv_goods
+      - id: usca_goods-eq
+        type: invoice_total_equation
+        step: inv_goods
+      - id: usca_goods-tax
+        type: field_equals
+        step: inv_goods
+        path: result.tax
+        value: '7.25'
+      - id: usca_digital-noexc
+        type: no_exception
+        step: inv_digital
+      - id: usca_digital-eq
+        type: invoice_total_equation
+        step: inv_digital
+      - id: usca_digital-tax
+        type: field_equals
+        step: inv_digital
+        path: result.tax
+        value: '0.00'
+
+  - id: tax_usca_essential_exempt
+    description: US_CA — ESSENTIAL category is tax-exempt
+    tags:
+      - tax
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-tax-usca-essential
+          customer:
+            id: C-TAX-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-ESS
+              category: ESSENTIAL
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+    invariants:
+      - id: usca_essential-noexc
+        type: no_exception
+        step: invoice
+      - id: usca_essential-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: usca_essential-tax
+        type: field_equals
+        step: invoice
+        path: result.tax
+        value: '0.00'
+
+  - id: tax_usny_digital_taxed
+    description: US_NY — DIGITAL taxed at 8.875% (unlike US_CA where DIGITAL is exempt)
+    tags:
+      - tax
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-tax-usny
+          customer:
+            id: C-TAX-01
+            tier: RETAIL
+            region: US_NY
+            status: ACTIVE
+          items:
+            - sku: SKU-DIG
+              category: DIGITAL
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+    invariants:
+      - id: usny_digital-noexc
+        type: no_exception
+        step: invoice
+      - id: usny_digital-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: usny_digital-tax
+        type: field_equals
+        step: invoice
+        path: result.tax
+        value: '8.88'
+
+  - id: tax_eude_essential_reduced_rate
+    description: EU_DE — ESSENTIAL taxed at reduced 7% (not exempt, unlike UK)
+    tags:
+      - tax
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-tax-eude
+          customer:
+            id: C-TAX-01
+            tier: RETAIL
+            region: EU_DE
+            status: ACTIVE
+          items:
+            - sku: SKU-ESS
+              category: ESSENTIAL
+              qty: 1
+              unit_price: '300.00'
+          payment_method: CARD
+    invariants:
+      - id: eude_essential-noexc
+        type: no_exception
+        step: invoice
+      - id: eude_essential-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: eude_essential-tax
+        type: field_equals
+        step: invoice
+        path: result.tax
+        value: '21.00'
+      - id: eude_essential-shipping
+        type: field_equals
+        step: invoice
+        path: result.shipping
+        value: '0.00'
+
+  - id: tax_uk_goods_20pct
+    description: UK — GOODS taxed at 20%
+    tags:
+      - tax
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-tax-uk
+          customer:
+            id: C-TAX-01
+            tier: RETAIL
+            region: UK
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '300.00'
+          payment_method: CARD
+    invariants:
+      - id: uk_goods-noexc
+        type: no_exception
+        step: invoice
+      - id: uk_goods-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: uk_goods-tax
+        type: field_equals
+        step: invoice
+        path: result.tax
+        value: '60.00'
+
+  - id: tax_export_zero
+    description: EXPORT region — all categories are tax-exempt
+    tags:
+      - tax
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-tax-export
+          customer:
+            id: C-TAX-01
+            tier: RETAIL
+            region: EXPORT
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+    invariants:
+      - id: export_tax-noexc
+        type: no_exception
+        step: invoice
+      - id: export_tax-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: export_tax-tax
+        type: field_equals
+        step: invoice
+        path: result.tax
+        value: '0.00'
+
+  # ─────────────────────────────────────────────────────────────────
+  # MULTI-LINE INVOICE — rounding and discount allocation
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: multiline_vip_usny_mixed_categories
+    description: Multi-line invoice with VIP 3% discount, mixed GOODS/DIGITAL/ESSENTIAL categories in US_NY — exercises per-line discount allocation (HALF_EVEN) and residual to last line
+    tags:
+      - multiline
+      - tax
+      - stepped_tier_discounts
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-multiline
+          customer:
+            id: C-VIP-01
+            tier: VIP
+            region: US_NY
+            status: ACTIVE
+          items:
+            - sku: SKU-A
+              category: GOODS
+              qty: 2
+              unit_price: '49.99'
+            - sku: SKU-B
+              category: DIGITAL
+              qty: 1
+              unit_price: '30.01'
+            - sku: SKU-C
+              category: ESSENTIAL
+              qty: 3
+              unit_price: '10.00'
+          payment_method: CARD
+    invariants:
+      - id: multiline-noexc
+        type: no_exception
+        step: invoice
+      - id: multiline-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: multiline-subtotal
+        type: field_equals
+        step: invoice
+        path: result.subtotal
+        value: '159.99'
+      - id: multiline-discount
+        type: field_equals
+        step: invoice
+        path: result.discount
+        value: '4.80'
+      - id: multiline-tax
+        type: field_equals
+        step: invoice
+        path: result.tax
+        value: '11.19'
+      - id: multiline-grand
+        type: field_equals
+        step: invoice
+        path: result.grand_total
+        value: '166.38'
+
+  # ─────────────────────────────────────────────────────────────────
+  # REFUND TIMING BOUNDARIES
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: refund_at_24h_full_no_fee
+    description: Refund at exactly 24 hours — approved in full, no fee (inclusive boundary)
+    tags:
+      - refund
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-refund-24
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+      - id: refund
+        operation: refund_invoice
+        input:
+          operation_id: op-refund-24-act
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 24
+    invariants:
+      - id: ref24-inv-noexc
+        type: no_exception
+        step: invoice
+      - id: ref24-ref-noexc
+        type: no_exception
+        step: refund
+      - id: ref24-status
+        type: field_equals
+        step: refund
+        path: result.status
+        value: APPROVED
+      - id: ref24-fee_rate
+        type: field_equals
+        step: refund
+        path: result.fee_rate
+        value: '0.0000'
+      - id: ref24-fee
+        type: field_equals
+        step: refund
+        path: result.fee
+        value: '0.00'
+      - id: ref24-refund_amount
+        type: field_equals
+        step: refund
+        path: result.refund_amount
+        value: '119.25'
+      - id: ref24-inv_status
+        type: field_equals
+        step: refund
+        path: state_after.invoices.0.status
+        value: REFUNDED
+      - id: ref24-credit_ledger
+        type: state_table_delta
+        step: refund
+        table: ledger
+        delta: 1
+      - id: ref24-refund_not_above
+        type: refund_not_above_invoice
+        step: refund
+        invoice_step: invoice
+
+  - id: refund_at_25h_5pct_fee
+    description: Refund at 25 hours — 5% fee applies (one hour above full-refund boundary)
+    tags:
+      - refund
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-refund-25
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+      - id: refund
+        operation: refund_invoice
+        input:
+          operation_id: op-refund-25-act
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 25
+    invariants:
+      - id: ref25-noexc
+        type: no_exception
+        step: refund
+      - id: ref25-status
+        type: field_equals
+        step: refund
+        path: result.status
+        value: APPROVED
+      - id: ref25-fee_rate
+        type: field_equals
+        step: refund
+        path: result.fee_rate
+        value: '0.0500'
+      - id: ref25-fee
+        type: field_equals
+        step: refund
+        path: result.fee
+        value: '5.96'
+      - id: ref25-refund_amount
+        type: field_equals
+        step: refund
+        path: result.refund_amount
+        value: '113.29'
+      - id: ref25-not_above
+        type: refund_not_above_invoice
+        step: refund
+        invoice_step: invoice
+
+  - id: refund_at_72h_5pct_fee
+    description: Refund at exactly 72 hours — still APPROVED with 5% fee (inclusive upper boundary)
+    tags:
+      - refund
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-refund-72
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+      - id: refund
+        operation: refund_invoice
+        input:
+          operation_id: op-refund-72-act
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 72
+    invariants:
+      - id: ref72-noexc
+        type: no_exception
+        step: refund
+      - id: ref72-status
+        type: field_equals
+        step: refund
+        path: result.status
+        value: APPROVED
+      - id: ref72-fee_rate
+        type: field_equals
+        step: refund
+        path: result.fee_rate
+        value: '0.0500'
+      - id: ref72-refund_amount
+        type: field_equals
+        step: refund
+        path: result.refund_amount
+        value: '113.29'
+
+  - id: refund_at_73h_manual_review
+    description: Refund at 73 hours — MANUAL_REVIEW, refund_amount 0.00, no ledger entry, invoice stays OPEN
+    tags:
+      - refund
+      - critical_boundary
+      - state_transition
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-refund-73
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+      - id: refund
+        operation: refund_invoice
+        input:
+          operation_id: op-refund-73-act
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 73
+    invariants:
+      - id: ref73-noexc
+        type: no_exception
+        step: refund
+      - id: ref73-status
+        type: field_equals
+        step: refund
+        path: result.status
+        value: MANUAL_REVIEW
+      - id: ref73-refund_amount
+        type: field_equals
+        step: refund
+        path: result.refund_amount
+        value: '0.00'
+      - id: ref73-no_ledger_credit
+        type: state_table_delta
+        step: refund
+        table: ledger
+        delta: 0
+      - id: ref73-invoice_still_open
+        type: field_equals
+        step: refund
+        path: state_after.invoices.0.status
+        value: OPEN
+
+  # ─────────────────────────────────────────────────────────────────
+  # MULTI-STEP: FULL INVOICE → REFUND WORKFLOW
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: workflow_invoice_then_full_refund
+    description: Standard full workflow — create invoice (RETAIL/US_CA/GOODS/CARD) then refund at 10h; invoice transitions to REFUNDED, ledger has DEBIT then CREDIT, two audit events
+    tags:
+      - refund
+      - state_transition
+      - idempotency
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-ref-full
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '200.00'
+          payment_method: CARD
+      - id: refund
+        operation: refund_invoice
+        input:
+          operation_id: op-ref-act
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 10
+    invariants:
+      - id: wf_full-inv-noexc
+        type: no_exception
+        step: invoice
+      - id: wf_full-ref-noexc
+        type: no_exception
+        step: refund
+      - id: wf_full-inv-eq
+        type: invoice_total_equation
+        step: invoice
+      - id: wf_full-ref-status
+        type: field_equals
+        step: refund
+        path: result.status
+        value: APPROVED
+      - id: wf_full-ref-fee
+        type: field_equals
+        step: refund
+        path: result.fee
+        value: '0.00'
+      - id: wf_full-inv-refunded
+        type: field_equals
+        step: refund
+        path: state_after.invoices.0.status
+        value: REFUNDED
+      - id: wf_full-credit_ledger
+        type: state_table_delta
+        step: refund
+        table: ledger
+        delta: 1
+      - id: wf_full-not_above
+        type: refund_not_above_invoice
+        step: refund
+        invoice_step: invoice
+
+  # ─────────────────────────────────────────────────────────────────
+  # IDEMPOTENCY
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: idempotency_create_invoice
+    description: Repeated create_invoice with same operation_id returns identical result with no new state
+    tags:
+      - idempotency
+      - critical_boundary
+    steps:
+      - id: first
+        operation: create_invoice
+        input:
+          operation_id: op-idem-inv
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+      - id: second
+        operation: create_invoice
+        input:
+          operation_id: op-idem-inv
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+    invariants:
+      - id: idem_inv-first-noexc
+        type: no_exception
+        step: first
+      - id: idem_inv-second-noexc
+        type: no_exception
+        step: second
+      - id: idem_inv-same_result
+        type: same_result
+        step: first
+        other_step: second
+      - id: idem_inv-no_new_state
+        type: state_unchanged_between_steps
+        step: first
+        other_step: second
+      - id: idem_inv-no_new_events
+        type: no_new_events
+        step: second
+
+  - id: idempotency_refund_invoice
+    description: Repeated refund_invoice with same operation_id returns identical result with no new state or audit events
+    tags:
+      - idempotency
+      - refund
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-idem-ref-inv
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+      - id: first_refund
+        operation: refund_invoice
+        input:
+          operation_id: op-idem-ref
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 10
+      - id: second_refund
+        operation: refund_invoice
+        input:
+          operation_id: op-idem-ref
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 10
+    invariants:
+      - id: idem_ref-noexc
+        type: no_exception
+        step: first_refund
+      - id: idem_ref-second-noexc
+        type: no_exception
+        step: second_refund
+      - id: idem_ref-same_result
+        type: same_result
+        step: first_refund
+        other_step: second_refund
+      - id: idem_ref-no_new_state
+        type: state_unchanged_between_steps
+        step: first_refund
+        other_step: second_refund
+      - id: idem_ref-no_new_events
+        type: no_new_events
+        step: second_refund
+
+  # ─────────────────────────────────────────────────────────────────
+  # DUPLICATE APPROVED REFUND BLOCKED
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: refund_duplicate_approved_blocked
+    description: Second distinct refund attempt on an already-APPROVED-refunded invoice raises RefundAlreadyProcessedError
+    tags:
+      - refund
+      - validation
+      - state_transition
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-double-ref-first
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+      - id: first_refund
+        operation: refund_invoice
+        input:
+          operation_id: op-double-ref-first-rfnd
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 5
+      - id: second_refund
+        operation: refund_invoice
+        input:
+          operation_id: op-double-ref-second
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 5
+    invariants:
+      - id: dup_ref-first-noexc
+        type: no_exception
+        step: first_refund
+      - id: dup_ref-first-approved
+        type: field_equals
+        step: first_refund
+        path: result.status
+        value: APPROVED
+      - id: dup_ref-second-exception
+        type: exception_code
+        step: second_refund
+        code: REFUND_ALREADY_PROCESSED
+      - id: dup_ref-no_new_ledger
+        type: state_table_delta
+        step: second_refund
+        table: ledger
+        delta: 0
+      - id: dup_ref-no_new_refund
+        type: state_table_delta
+        step: second_refund
+        table: refunds
+        delta: 0
+
+  # ─────────────────────────────────────────────────────────────────
+  # MANUAL_REVIEW DOES NOT BLOCK SUBSEQUENT APPROVED REFUND
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: refund_manual_review_then_approved
+    description: MANUAL_REVIEW refund does not block a subsequent approved refund for same invoice
+    tags:
+      - refund
+      - state_transition
+      - critical_boundary
+    steps:
+      - id: invoice
+        operation: create_invoice
+        input:
+          operation_id: op-manual-ref
+          customer:
+            id: C-RETAIL-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '100.00'
+          payment_method: CARD
+      - id: manual_refund
+        operation: refund_invoice
+        input:
+          operation_id: op-manual-first
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 100
+      - id: approved_refund
+        operation: refund_invoice
+        input:
+          operation_id: op-approve-after-manual
+          invoice_id: $steps.invoice.result.invoice_id
+          hours_since_purchase: 5
+    invariants:
+      - id: manual_then_appr-manual-noexc
+        type: no_exception
+        step: manual_refund
+      - id: manual_then_appr-manual-status
+        type: field_equals
+        step: manual_refund
+        path: result.status
+        value: MANUAL_REVIEW
+      - id: manual_then_appr-approved-noexc
+        type: no_exception
+        step: approved_refund
+      - id: manual_then_appr-approved-status
+        type: field_equals
+        step: approved_refund
+        path: result.status
+        value: APPROVED
+      - id: manual_then_appr-inv_refunded
+        type: field_equals
+        step: approved_refund
+        path: state_after.invoices.0.status
+        value: REFUNDED
+
+  # ─────────────────────────────────────────────────────────────────
+  # VALIDATION FAILURES — atomic (no side effects)
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: validation_missing_operation_id
+    description: create_invoice with no operation_id raises ValidationError; no state created
+    tags:
+      - validation
+    steps:
+      - id: attempt
+        operation: create_invoice
+        input:
+          operation_id: ''
+          customer:
+            id: C-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '10.00'
+          payment_method: CARD
+    invariants:
+      - id: val_noop-exc
+        type: exception_code
+        step: attempt
+        code: VALIDATION_ERROR
+      - id: val_noop-no_invoice
+        type: state_table_delta
+        step: attempt
+        table: invoices
+        delta: 0
+      - id: val_noop-no_ledger
+        type: state_table_delta
+        step: attempt
+        table: ledger
+        delta: 0
+
+  - id: validation_suspended_customer
+    description: create_invoice with suspended customer raises AccountSuspendedError; no state created
+    tags:
+      - validation
+      - critical_boundary
+    steps:
+      - id: attempt
+        operation: create_invoice
+        input:
+          operation_id: op-val-nosuspend
+          customer:
+            id: C-SUSP-01
+            tier: RETAIL
+            region: US_CA
+            status: SUSPENDED
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '10.00'
+          payment_method: CARD
+    invariants:
+      - id: val_susp-exc
+        type: exception_code
+        step: attempt
+        code: ACCOUNT_SUSPENDED
+      - id: val_susp-no_invoice
+        type: state_table_delta
+        step: attempt
+        table: invoices
+        delta: 0
+      - id: val_susp-no_ledger
+        type: state_table_delta
+        step: attempt
+        table: ledger
+        delta: 0
+
+  - id: validation_invalid_tier
+    description: create_invoice with unknown tier raises ValidationError
+    tags:
+      - validation
+    steps:
+      - id: attempt
+        operation: create_invoice
+        input:
+          operation_id: op-val-badtier
+          customer:
+            id: C-01
+            tier: GOLD
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '10.00'
+          payment_method: CARD
+    invariants:
+      - id: val_tier-exc
+        type: exception_code
+        step: attempt
+        code: VALIDATION_ERROR
+      - id: val_tier-no_invoice
+        type: state_table_delta
+        step: attempt
+        table: invoices
+        delta: 0
+
+  - id: validation_invalid_region
+    description: create_invoice with unknown region raises ValidationError
+    tags:
+      - validation
+    steps:
+      - id: attempt
+        operation: create_invoice
+        input:
+          operation_id: op-val-badregion
+          customer:
+            id: C-01
+            tier: RETAIL
+            region: APAC
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '10.00'
+          payment_method: CARD
+    invariants:
+      - id: val_region-exc
+        type: exception_code
+        step: attempt
+        code: VALIDATION_ERROR
+      - id: val_region-no_invoice
+        type: state_table_delta
+        step: attempt
+        table: invoices
+        delta: 0
+
+  - id: validation_empty_items
+    description: create_invoice with empty items list raises ValidationError
+    tags:
+      - validation
+    steps:
+      - id: attempt
+        operation: create_invoice
+        input:
+          operation_id: op-val-empty-items
+          customer:
+            id: C-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items: []
+          payment_method: CARD
+    invariants:
+      - id: val_empty-exc
+        type: exception_code
+        step: attempt
+        code: VALIDATION_ERROR
+      - id: val_empty-no_invoice
+        type: state_table_delta
+        step: attempt
+        table: invoices
+        delta: 0
+
+  - id: validation_zero_qty
+    description: Invoice item with qty=0 raises ValidationError
+    tags:
+      - validation
+    steps:
+      - id: attempt
+        operation: create_invoice
+        input:
+          operation_id: op-val-zero-qty
+          customer:
+            id: C-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 0
+              unit_price: '10.00'
+          payment_method: CARD
+    invariants:
+      - id: val_qty-exc
+        type: exception_code
+        step: attempt
+        code: VALIDATION_ERROR
+
+  - id: validation_negative_unit_price
+    description: Invoice item with unit_price < 0 raises ValidationError
+    tags:
+      - validation
+    steps:
+      - id: attempt
+        operation: create_invoice
+        input:
+          operation_id: op-val-neg-price
+          customer:
+            id: C-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '-1.00'
+          payment_method: CARD
+    invariants:
+      - id: val_price-exc
+        type: exception_code
+        step: attempt
+        code: VALIDATION_ERROR
+
+  - id: validation_unknown_coupon
+    description: Unknown coupon code raises ValidationError; no state created
+    tags:
+      - validation
+      - coupon
+    steps:
+      - id: attempt
+        operation: create_invoice
+        input:
+          operation_id: op-val-bad-coupon
+          customer:
+            id: C-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '10.00'
+          payment_method: CARD
+          coupon: BOGUS50
+    invariants:
+      - id: val_coupon-exc
+        type: exception_code
+        step: attempt
+        code: VALIDATION_ERROR
+      - id: val_coupon-no_invoice
+        type: state_table_delta
+        step: attempt
+        table: invoices
+        delta: 0
+
+  - id: validation_invalid_payment_method
+    description: Unknown payment_method raises ValidationError
+    tags:
+      - validation
+    steps:
+      - id: attempt
+        operation: create_invoice
+        input:
+          operation_id: op-val-bad-pay
+          customer:
+            id: C-01
+            tier: RETAIL
+            region: US_CA
+            status: ACTIVE
+          items:
+            - sku: SKU-001
+              category: GOODS
+              qty: 1
+              unit_price: '10.00'
+          payment_method: CRYPTO
+    invariants:
+      - id: val_pay-exc
+        type: exception_code
+        step: attempt
+        code: VALIDATION_ERROR
+
+  - id: validation_refund_invoice_not_found
+    description: refund_invoice with non-existent invoice_id raises InvoiceNotFoundError
+    tags:
+      - validation
+      - refund
+    steps:
+      - id: attempt
+        operation: refund_invoice
+        input:
+          operation_id: op-val-refund-notfound
+          invoice_id: INV-DOESNOTEXIST
+          hours_since_purchase: 5
+    invariants:
+      - id: val_notfound-exc
+        type: exception_code
+        step: attempt
+        code: INVOICE_NOT_FOUND
+      - id: val_notfound-no_refund
+        type: state_table_delta
+        step: attempt
+        table: refunds
+        delta: 0
+
+  - id: validation_refund_negative_hours
+    description: refund_invoice with hours_since_purchase < 0 raises ValidationError
+    tags:
+      - validation
+      - refund
+    steps:
+      - id: attempt
+        operation: refund_invoice
+        input:
+          operation_id: op-val-neg-hours
+          invoice_id: INV-DOESNOTEXIST
+          hours_since_purchase: -1
+    invariants:
+      - id: val_neg_hours-exc
+        type: exception_code
+        step: attempt
+        code: VALIDATION_ERROR
