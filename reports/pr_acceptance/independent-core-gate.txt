@@ -1,0 +1,85 @@
+
+============================================================
+1/6 - Aegis engine tests
+============================================================
+...........................                                              [100%]
+27 passed in 1.78s
+
+============================================================
+2/6 - Legacy behavioral-contract coverage
+============================================================
+AEGIS CONTRACT COVERAGE
+Scenarios                  : 86
+Workflow steps             : 100
+Legacy statement coverage  : 100.00%
+Legacy branch coverage     : 98.96%
+Contract readiness         : READY
+
+============================================================
+3/6 - Behavioral equivalence
+============================================================
+====================================================================
+AEGIS CONTRACTLOCK - MODERNIZATION VERDICT
+====================================================================
+Cases matched : 86 / 86
+Cases drifted : 0
+Baseline hash : 2fd2c2f96614e5bcf8fa807b5c1b777fc702f53707be047ddf01c5a852680da7
+Candidate hash: d919b4055c09e30ee9654d92e302aa64c46195716d53525d57023e1430216c99
+
+VERDICT: ACCEPTED
+
+Scope: equivalence across the defined contract and executed scenario corpus; not formal proof of complete program equivalence.
+====================================================================
+JSON report: reports/verification.json
+MD report  : reports/verification.md
+
+============================================================
+4/6 - Architecture integrity
+============================================================
+AEGIS STRUCTURAL MODERNIZATION
+Largest module LOC: 381 -> 205
+Python modules    : 1 -> 11
+Modern legacy imports: 0
+Modern cycles        : 0
+
+============================================================
+5/6 - Seeded regression audit
+============================================================
+AEGIS VERIFIER GAUNTLET
+Seeded regressions : 21
+Detected           : 21
+Escaped            : 0
+Detection rate     : 100.00%
+Verifier validation: PASS
+
+============================================================
+6/6 - Complete submission readiness
+============================================================
+AEGIS SUBMISSION READINESS
+--------------------------------------------
+engine_tests                       PASS
+contract_coverage                  PASS
+modernization_verify               PASS
+regression_gauntlet                PASS
+architecture_no_legacy_imports     PASS
+architecture_no_cycles             PASS
+certificate_no_drift               PASS
+Scenarios                          86
+Statement coverage                 100.00%
+Branch coverage                    98.96%
+Regression gauntlet                21/21
+--------------------------------------------
+SUBMISSION READINESS: READY
+
+============================================================
+AEGIS CONTRACTLOCK - SUBMISSION VERIFICATION
+============================================================
+Engine tests               PASS
+Contract coverage          PASS
+Behavioral equality        PASS
+Architecture               PASS
+Mutation gauntlet          PASS
+Evidence readiness         PASS
+------------------------------------------------------------
+FINAL: READY
+All submission verification gates passed.

@@ -8,6 +8,8 @@
 [![Mutation Audit](https://img.shields.io/badge/Seeded%20Regressions-21%2F21%20Detected-blue)](reports/gauntlet-report.md)
 [![Verifier Tests](https://img.shields.io/badge/Verifier%20Tests-27%2F27%20Passing-brightgreen)](tests/)
 [![Generated Holdout](https://img.shields.io/badge/Post--Freeze%20Holdout-54%2F63%20Detected-orange)](reports/generated-mutation-audit.md)
+[![PR Challenge](https://img.shields.io/badge/PR%20Challenge-24%2F24%20Targeted%20Mutations%20Blocked-brightgreen)](reports/pr_acceptance/pr-adversarial-audit.md)
+[![Merge Evidence](https://img.shields.io/badge/Bob%20Task%208-MERGE__ELIGIBLE-brightgreen)](docs/pr_acceptance/PR_ACCEPTANCE_WORKFLOW.md)
 [![IBM Bob](https://img.shields.io/badge/IBM%20Bob-5%20Captured%20Sessions-informational)](bob_sessions/final/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -24,7 +26,12 @@ If you have only a few minutes, inspect these in order:
 
 | What to inspect | Location |
 |---|---|
-| Real IBM Bob task captures | [`bob_sessions/final/`](bob_sessions/final/) |
+| Live PR semantic acceptance workflow | [`docs/pr_acceptance/PR_ACCEPTANCE_WORKFLOW.md`](docs/pr_acceptance/PR_ACCEPTANCE_WORKFLOW.md) |
+| Task 7 — Bob detects + repairs PR drift | [`task7_bob_pr_semantic_acceptance.png`](bob_evidence/pr_acceptance/task7_bob_pr_semantic_acceptance.png) |
+| Task 8 — Bob read-only merge evidence review | [`task8_bob_merge_evidence_review.png`](bob_evidence/pr_acceptance/task8_bob_merge_evidence_review.png) |
+| Independent post-Bob acceptance gate | [`reports/pr_acceptance/independent-core-gate.txt`](reports/pr_acceptance/independent-core-gate.txt) |
+| PR-specific adversarial challenge | [`reports/pr_acceptance/pr-adversarial-audit.md`](reports/pr_acceptance/pr-adversarial-audit.md) |
+| Real IBM Bob clean-room task captures | [`bob_sessions/final/`](bob_sessions/final/) |
 | Bob clean-room evidence review | [`bob_evidence/docs/task5-bob-evidence-review.md`](bob_evidence/docs/task5-bob-evidence-review.md) |
 | Hardened behavioral contract | [`aegis_contract.yaml`](aegis_contract.yaml) |
 | Hardened verification report | [`reports/verification.md`](reports/verification.md) |
@@ -63,7 +70,142 @@ Readiness                READY
 
 ---
 
-## The 60-Second Story
+## The Real PR Acceptance Story
+
+The strongest Aegis demonstration is a real GitHub pull-request workflow.
+
+> **IBM Bob repairs the PR. Aegis challenges the repair outside Bob. Bob returns as a read-only evidence reviewer. A human retains the final merge decision.**
+
+```text
+GitHub PR #1
+Refactor pricing thresholds into named policy constants
+        |
+        v
+IBM Bob Task 7
+PR Semantic Acceptance Agent
+        |
+        v
+Aegis executes sealed behavioral contract
+        |
+        v
+85 / 86 matched
+1 semantic drift
+BLOCKED
+        |
+        v
+Counterexample
+VIP subtotal exactly $1000.00
+
+Expected: 10% discount, $965.25 grand total
+Defective PR: 7% discount, $997.43 grand total
+Customer impact: +$32.18
+        |
+        v
+IBM Bob diagnoses one operator
+>  ->  >=
+        |
+        v
+86 / 86 ACCEPTED
+        |
+        v
+BOB REPAIR COMPLETE
+INDEPENDENT ACCEPTANCE REQUIRED
+        |
+        v
+Independent post-Bob gate
+27 / 27 verifier tests
+86 / 86 behavioral cases
+21 / 21 curated seeded regressions
+100.00% statement coverage
+98.96% branch coverage
+0 legacy imports
+0 cycles
+FINAL: READY
+        |
+        v
+Repair candidate frozen
+fabc7b7...
+        |
+        v
+Post-freeze PR-specific challenge
+24 targeted mutations
+24 runnable
+24 BLOCKED
+0 survivors
+        |
+        v
+IBM Bob Task 8
+READ-ONLY merge evidence reviewer
+        |
+        v
+MERGE_ELIGIBLE
+        |
+        v
+Human authorization
+        |
+        v
+GitHub PR #1 MERGED
+merge commit 1f79baf
+```
+
+### Why this matters
+
+A green test suite does not necessarily prove that an AI-assisted refactor preserved the business.
+
+Aegis adds an acceptance boundary around the coding agent:
+
+1. **Bob understands and repairs the change.**
+2. **Aegis executes the legacy and modern implementations against the sealed behavioral contract.**
+3. **The repaired candidate is frozen before the adversarial challenge.**
+4. **A targeted post-freeze challenge tries to reintroduce pricing-policy drift outside Bob.**
+5. **Bob returns only as a read-only evidence reviewer.**
+6. **The human retains final merge authority.**
+
+This separates the agent that **changes the software** from the evidence required to **accept the software**.
+
+### Real PR evidence
+
+| Stage | Evidence |
+|---|---|
+| Original PR commit | `5276fa2` |
+| Task 7 pre-repair result | 85 / 86, 1 drift, `BLOCKED` |
+| Behavioral counterexample | `bnd_vip_subtotal_1000_00` |
+| Customer-impact delta | +$32.18 |
+| Bob repair | one comparison operator: `>` -> `>=` |
+| Repair commit | `fabc7b7a3a960fd1df7b7c6e51c44a27f797f95a` |
+| Repair freeze | `aegis-pr-repair-freeze-20260927` |
+| Independent verifier tests | 27 / 27 |
+| Independent behavioral acceptance | 86 / 86 |
+| Curated seeded negative controls | 21 / 21 detected |
+| PR-specific targeted challenge | 24 / 24 BLOCKED |
+| PR-specific survivors | 0 |
+| Task 8 verdict | `MERGE_ELIGIBLE` |
+| Human merge commit | `1f79baf` |
+
+Evidence:
+
+- [`PR_ACCEPTANCE_WORKFLOW.md`](docs/pr_acceptance/PR_ACCEPTANCE_WORKFLOW.md)
+- [`Task 7 IBM Bob capture`](bob_evidence/pr_acceptance/task7_bob_pr_semantic_acceptance.png)
+- [`Task 8 IBM Bob capture`](bob_evidence/pr_acceptance/task8_bob_merge_evidence_review.png)
+- [`Independent core gate`](reports/pr_acceptance/independent-core-gate.txt)
+- [`PR-specific adversarial audit`](reports/pr_acceptance/pr-adversarial-audit.md)
+
+### Scope of the 24 / 24 result
+
+The post-repair challenge was deliberately finite and focused on the pricing-policy surface changed by PR #1.
+
+It tested targeted mutations involving inclusive/exclusive boundaries, threshold values shifted by one cent, discount-rate changes, and customer-tier routing changes.
+
+All 24 runnable targeted mutations were detected and blocked.
+
+That is **100% detection within this finite PR-specific mutation set**. It is not a claim of exhaustive mutation sensitivity or formal proof of complete program equivalence.
+
+The separate historical generated holdout remains fully disclosed: **54 / 63 runnable mutants detected, with 9 survivors**. Those survivors remain evidence of finite contract-coverage boundaries and were not used to backfit the contract.
+
+---
+
+## Original Clean-Room 60-Second Story
+
 
 The central demonstration is deliberately simple.
 
