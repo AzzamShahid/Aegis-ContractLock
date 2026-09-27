@@ -15,7 +15,7 @@ BUSINESS_STANDARD_THRESHOLD = Decimal("1000.00")
 def calculate_tier_discount(tier: str, subtotal: Decimal) -> Decimal:
     """Calculate tier discount rate based on customer tier and subtotal."""
     if tier == "VIP":
-        if subtotal > VIP_PREMIUM_THRESHOLD:
+        if subtotal >= VIP_PREMIUM_THRESHOLD:
             return Decimal("0.10")
         if subtotal >= VIP_STANDARD_THRESHOLD:
             return Decimal("0.07")
