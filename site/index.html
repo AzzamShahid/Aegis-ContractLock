@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#07111f" />
+  <title>Aegis ContractLock — Evidence-Gated Legacy Modernization</title>
+  <meta name="description" content="IBM Bob modernizes legacy systems. Aegis seals their behavior, detects semantic drift, drives evidence-based repair, and independently gates the human merge decision." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" />
+  <style>
+    :root{
+      --bg:#07111f; --bg2:#0b1626; --panel:#0f1c30; --panel2:#13223a;
+      --line:#263a57; --text:#f7f9fc; --muted:#9fb0c6;
+      --cyan:#6ee7ff; --green:#6ee7b7; --red:#ff7d90; --amber:#ffd166; --violet:#b8a1ff;
+      --shadow:0 24px 70px rgba(0,0,0,.30); --radius:24px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;color:var(--text);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 8% 0%,rgba(110,231,255,.11),transparent 28rem),
+        radial-gradient(circle at 92% 8%,rgba(110,231,183,.08),transparent 25rem),
+        linear-gradient(180deg,var(--bg) 0%,var(--bg2) 48%,var(--bg) 100%);
+    }
+    a{color:inherit;text-decoration:none}
+    code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    .wrap{width:min(1220px,calc(100% - 40px));margin:auto}
+    .nav{position:sticky;top:0;z-index:50;background:rgba(7,17,31,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(38,58,87,.8)}
+    .nav-inner{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .brand{font-weight:900;letter-spacing:-.03em}.brand span{color:var(--cyan)}
+    .navlinks{display:flex;gap:6px;flex-wrap:wrap}
+    .navlinks a{font-size:.82rem;color:var(--muted);font-weight:750;padding:9px 10px;border-radius:999px}
+    .navlinks a:hover{background:rgba(255,255,255,.05);color:var(--text)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 17px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);font-weight:800;transition:.2s}
+    .btn:hover{transform:translateY(-1px);border-color:#3f5d86}
+    .btn.primary{border:none;color:#07111f;background:linear-gradient(135deg,var(--cyan),var(--green))}
+    .hero{text-align:center;padding:94px 0 48px}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(110,231,255,.22);background:rgba(110,231,255,.05);border-radius:999px;color:#c9f7ff;font-size:.82rem;font-weight:800}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 16px var(--green)}
+    h1{max-width:1060px;margin:24px auto 18px;font-size:clamp(3rem,7vw,6.6rem);line-height:.94;letter-spacing:-.06em}
+    .accent{background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lead{max-width:930px;margin:0 auto;color:var(--muted);font-size:clamp(1.06rem,2vw,1.26rem);line-height:1.75}
+    .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+    .statusbar{display:inline-flex;align-items:center;gap:10px;margin-top:32px;padding:10px 14px;border:1px solid rgba(110,231,183,.24);background:rgba(110,231,183,.06);border-radius:999px;color:#c7ffe8;font-weight:800}
+    .section{padding:76px 0}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:26px}
+    .section-head h2{margin:0;font-size:clamp(2.1rem,4vw,3.55rem);letter-spacing:-.045em}
+    .section-head p{margin:0;max-width:650px;color:var(--muted);line-height:1.7}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(19,34,58,.93),rgba(15,28,48,.93));border-radius:var(--radius);box-shadow:var(--shadow);padding:26px}
+    .card h3{margin:0 0 10px;font-size:1.22rem}.card p{margin:0;color:var(--muted);line-height:1.68}
+    .third{grid-column:span 4}.half{grid-column:span 6}.wide{grid-column:span 8}.narrow{grid-column:span 4}.metric{grid-column:span 3}
+    .metric .n{font-size:2.45rem;font-weight:900;letter-spacing:-.055em}.metric .k{margin-top:7px;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+    .label{display:inline-block;margin-bottom:12px;padding:6px 9px;border-radius:999px;font-size:.73rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+    .cyan{background:rgba(110,231,255,.10);color:var(--cyan)} .green{background:rgba(110,231,183,.10);color:var(--green)}
+    .red{background:rgba(255,125,144,.10);color:var(--red)} .amber{background:rgba(255,209,102,.10);color:var(--amber)}
+    .violet{background:rgba(184,161,255,.10);color:var(--violet)}
+    .journey{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+    .journey .node,.story .step{min-height:168px;padding:18px 15px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border-radius:18px;text-align:left}
+    .journey small,.story small{display:block;color:var(--muted);font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;margin-bottom:10px}
+    .journey strong,.story strong{display:block;font-size:1.05rem;line-height:1.2}
+    .journey p,.story p{margin:8px 0 0;color:var(--muted);font-size:.83rem;line-height:1.48}
+    .bob strong{color:var(--cyan)} .aegis strong{color:var(--green)} .human strong{color:var(--amber)} .bad strong{color:var(--red)} .good strong{color:var(--green)}
+    .pipeline{margin-top:18px;overflow:auto}
+    .pipeline pre{min-width:930px;margin:0;padding:24px;border:1px solid var(--line);border-radius:18px;background:#07111f;color:#dce8f7;line-height:1.78;white-space:pre}
+    .story{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+    .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;padding:13px 0;border-bottom:1px solid var(--line)}
+    .row span:first-child{color:var(--muted)} .delta{color:var(--red);font-weight:900}
+    .repair-code{margin:22px 0 16px;padding:20px;border-radius:18px;border:1px solid rgba(110,231,255,.22);background:#07111f;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:1.08rem}
+    .minus{color:var(--red)} .plus{color:var(--green)}
+    .callout{margin-top:18px;padding:18px 20px;border-radius:18px;border:1px solid rgba(255,209,102,.22);background:rgba(255,209,102,.05);color:#ffe9ad;line-height:1.65}
+    .separation{padding:22px;border-radius:20px;border:1px solid rgba(184,161,255,.24);background:rgba(184,161,255,.06)}
+    .separation strong{color:#d8ccff}
+    .timeline{display:grid;gap:14px}
+    .timeline-item{display:grid;grid-template-columns:140px 1fr;gap:18px;align-items:start;padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.02)}
+    .timeline-mark{font-size:.78rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--cyan)}
+    .timeline-item p{margin:4px 0 0;color:var(--muted);line-height:1.58}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}
+    table{width:100%;border-collapse:collapse;min-width:790px}
+    th,td{padding:14px 15px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    th{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:rgba(255,255,255,.02)}
+    td{font-size:.92rem} tr:last-child td{border-bottom:none}
+    ul.clean{list-style:none;padding:0;margin:14px 0 0}
+    ul.clean li{padding:10px 0;border-bottom:1px solid var(--line);color:var(--muted);display:flex;gap:10px;align-items:flex-start}
+    ul.clean li:before{content:"✓";color:var(--green);font-weight:900}.warnings li:before{content:"•";color:var(--amber)}
+    .hash{word-break:break-all;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#d6e3f4;font-size:.84rem}
+    .footer{padding:30px 0 44px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+    .footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    @media(max-width:1040px){.journey,.story{grid-template-columns:repeat(2,1fr)}.metric{grid-column:span 6}.third,.half,.wide,.narrow{grid-column:span 12}.navlinks{display:none}}
+    @media(max-width:640px){.wrap{width:min(100% - 24px,1220px)}.hero{padding-top:54px}.journey,.story{grid-template-columns:1fr}.metric{grid-column:span 12}.section{padding:54px 0}.section-head{align-items:start;flex-direction:column}.timeline-item{grid-template-columns:1fr}.hero-actions .btn{width:100%}}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#"><span>AEGIS</span> CONTRACTLOCK</a>
+      <nav class="navlinks" aria-label="Primary">
+        <a href="#journey">Legacy → Modern</a>
+        <a href="#real-pr">Real PR Proof</a>
+        <a href="#hardened">Hardened</a>
+        <a href="#clean-room">Bob Clean-Room</a>
+        <a href="#challenge">Challenges</a>
+        <a href="#governance">Governance</a>
+        <a href="#provenance">Provenance</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow"><span class="dot"></span> IBM Bob 2.0 Hackathon · Evidence-Gated Legacy Modernization</div>
+      <h1>From legacy monolith<br><span class="accent">to verified modernization.</span></h1>
+      <p class="lead">
+        IBM Bob reconstructs legacy behavior, modernizes the monolith, diagnoses drift, and repairs the candidate.
+        Aegis seals the reference behavior and independently verifies that the modern system preserves the observable behavior represented by the contract.
+      </p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#journey">See the modernization journey</a>
+        <a class="btn" href="#real-pr">See the real PR proof</a>
+        <a class="btn" href="https://github.com/AzzamShahid/Aegis-ContractLock" target="_blank" rel="noreferrer">Open public repository</a>
+      </div>
+      <div class="statusbar"><span class="dot"></span> CURRENT HARDENED SUBMISSION: READY</div>
+    </section>
+
+    <section class="section" id="journey">
+      <div class="section-head">
+        <h2>Legacy → Modernization → Independent Acceptance</h2>
+        <p>
+          This is the Aegis ContractLock product. The PR workflow later is one concrete proof that the full modernization control loop works.
+        </p>
+      </div>
+
+      <div class="journey">
+        <div class="node bob">
+          <small>01 · IBM Bob</small>
+          <strong>Contract archaeology</strong>
+          <p>Bob investigates the legacy source and available policy context to reconstruct an executable behavioral contract.</p>
+        </div>
+        <div class="node aegis">
+          <small>02 · Aegis</small>
+          <strong>Baseline seal</strong>
+          <p>Aegis executes the legacy reference and records normalized evidence across scenarios, state, ledger, audit, and invariants.</p>
+        </div>
+        <div class="node bob">
+          <small>03 · IBM Bob</small>
+          <strong>Modernization</strong>
+          <p>Bob transforms the monolith into a cleaner, modular candidate architecture.</p>
+        </div>
+        <div class="node aegis">
+          <small>04 · Aegis</small>
+          <strong>Twin-run verification</strong>
+          <p>Legacy and modern implementations receive the same scenarios and their observable behavior is compared.</p>
+        </div>
+        <div class="node aegis">
+          <small>05 · Aegis</small>
+          <strong>Drift detection</strong>
+          <p>Any mismatch can block acceptance and produce a behavioral counterexample.</p>
+        </div>
+        <div class="node bob">
+          <small>06 · IBM Bob</small>
+          <strong>Closed-loop repair</strong>
+          <p>Bob diagnoses from evidence and applies a focused repair without self-approving the result.</p>
+        </div>
+        <div class="node human">
+          <small>07 · Human</small>
+          <strong>Evidence-gated merge</strong>
+          <p>Aegis re-verifies independently. Bob may review read-only. A human retains merge authority.</p>
+        </div>
+      </div>
+
+      <div class="pipeline">
+        <pre>LEGACY MONOLITH
+      │
+      ▼
+IBM BOB — CONTRACT ARCHAEOLOGY
+reconstruct executable behavior contract
+      │
+      ▼
+AEGIS — BASELINE SEAL
+returns + exceptions + state + ledger + audit + idempotency + invariants
+      │
+      ▼
+IBM BOB — MODERNIZATION
+monolith → modular modern candidate
+      │
+      ▼
+AEGIS — TWIN-RUN VERIFICATION
+legacy reference ⇄ same scenarios ⇄ modern candidate
+      │
+      ├──────── behavior matches ────────► ACCEPTED
+      │
+      └──────── behavior drifts ─────────► BLOCKED
+                                              │
+                                              ▼
+                                   BEHAVIORAL COUNTEREXAMPLE
+                                              │
+                                              ▼
+                                     IBM BOB — REPAIR
+                                              │
+                                              ▼
+                                    AEGIS — RE-VERIFY
+                                              │
+                                              ▼
+                                    HUMAN MERGE DECISION</pre>
+      </div>
+
+      <div class="callout">
+        <strong>Scope:</strong> Aegis demonstrates behavioral equivalence across the defined contract and executed scenario corpus.
+        It does not claim formal proof of complete program equivalence or independent correctness of the legacy business policy itself.
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Why enterprises need this</h2>
+        <p>Legacy systems frequently encode business rules in implementation details that are easy to disturb during AI-assisted refactoring.</p>
+      </div>
+      <div class="grid">
+        <article class="card third">
+          <span class="label red">Legacy risk</span>
+          <h3>Behavior hides in implementation</h3>
+          <p>Tax rules, tier thresholds, rounding, refunds, ledger effects, audit events, and state transitions may not be fully documented.</p>
+        </article>
+        <article class="card third">
+          <span class="label amber">AI risk</span>
+          <h3>Green tests can still miss drift</h3>
+          <p>A candidate can be cleaner and pass ordinary tests while silently changing a boundary condition or financial outcome.</p>
+        </article>
+        <article class="card third">
+          <span class="label green">Aegis answer</span>
+          <h3>Separate transformation from acceptance</h3>
+          <p>Bob changes the software. Aegis checks the evidence. A human decides whether to merge.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="real-pr">
+      <div class="section-head">
+        <h2>Real PR proof: green tests were not enough</h2>
+        <p>A real pricing refactor looked safe until Aegis exercised the exact VIP boundary.</p>
+      </div>
+
+      <div class="story">
+        <div class="step">
+          <small>01 · PR</small>
+          <strong>Green pull request</strong>
+          <p>Pricing thresholds were refactored into named policy constants.</p>
+        </div>
+        <div class="step bad">
+          <small>02 · Aegis</small>
+          <strong>85 / 86 — BLOCKED</strong>
+          <p>One semantic drift appeared at the exact VIP premium threshold.</p>
+        </div>
+        <div class="step bad">
+          <small>03 · Impact</small>
+          <strong>+$32.18</strong>
+          <p>$965.25 expected. $997.43 produced by the defective PR.</p>
+        </div>
+        <div class="step bob">
+          <small>04 · IBM Bob</small>
+          <strong>&gt; → &gt;=</strong>
+          <p>Bob diagnosed the inclusive-boundary regression and repaired one operator.</p>
+        </div>
+        <div class="step good">
+          <small>05 · Aegis</small>
+          <strong>86 / 86 — ACCEPTED</strong>
+          <p>The repaired candidate matched the executed contract.</p>
+        </div>
+        <div class="step good">
+          <small>06 · Challenge</small>
+          <strong>24 / 24 BLOCKED</strong>
+          <p>Every runnable mutation in the finite PR-specific challenge was detected.</p>
+        </div>
+        <div class="step human">
+          <small>07 · Human</small>
+          <strong>MERGE_ELIGIBLE</strong>
+          <p>Bob reviewed evidence read-only. Human authorization remained required.</p>
+        </div>
+      </div>
+
+      <div style="height:16px"></div>
+      <div class="grid">
+        <article class="card wide">
+          <span class="label red">Behavioral counterexample</span>
+          <h3>VIP subtotal exactly $1,000.00</h3>
+          <div style="margin-top:16px">
+            <div class="row"><span>Expected discount rate</span><strong>10%</strong></div>
+            <div class="row"><span>Defective PR discount rate</span><strong>7%</strong></div>
+            <div class="row"><span>Expected grand total</span><strong>$965.25</strong></div>
+            <div class="row"><span>Defective PR grand total</span><strong>$997.43</strong></div>
+            <div class="row"><span>Customer-impact delta</span><strong class="delta">+$32.18</strong></div>
+          </div>
+        </article>
+        <article class="card narrow">
+          <span class="label cyan">IBM Bob repair</span>
+          <h3>Minimal surgical fix</h3>
+          <div class="repair-code">
+            <div class="minus">- subtotal &gt; VIP_PREMIUM_THRESHOLD</div>
+            <div class="plus">+ subtotal &gt;= VIP_PREMIUM_THRESHOLD</div>
+          </div>
+          <p>Bob preserved the named-constant refactor and changed only the comparison operator.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="hardened">
+      <div class="section-head">
+        <h2>Hardened public validation package</h2>
+        <p>The current public corpus is broader than the historical Bob clean-room run and remains separately attributed.</p>
+      </div>
+      <div class="grid">
+        <article class="card metric"><div class="n">86 / 86</div><div class="k">Behavioral scenarios</div></article>
+        <article class="card metric"><div class="n">100</div><div class="k">Workflow steps</div></article>
+        <article class="card metric"><div class="n">231</div><div class="k">Contract invariants</div></article>
+        <article class="card metric"><div class="n">32 / 32</div><div class="k">Verifier tests</div></article>
+        <article class="card metric"><div class="n">100.00%</div><div class="k">Legacy statements</div></article>
+        <article class="card metric"><div class="n">98.96%</div><div class="k">Legacy branches</div></article>
+        <article class="card metric"><div class="n">21 / 21</div><div class="k">Seeded regressions</div></article>
+        <article class="card metric"><div class="n">READY</div><div class="k">Submission readiness</div></article>
+      </div>
+      <div style="height:16px"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Structural Metric</th><th>Legacy Monolith</th><th>Modern Candidate</th><th>Delta / Decoupling</th></tr></thead>
+          <tbody>
+            <tr><td>Python modules</td><td>1</td><td>11</td><td><strong>+10 modules</strong> with domain separation</td></tr>
+            <tr><td>Largest module LOC</td><td>381</td><td>205</td><td><strong>-176 LOC</strong> (-46.19%)</td></tr>
+            <tr><td>Classes / types</td><td>6</td><td>8</td><td>Typed domain models and errors</td></tr>
+            <tr><td>Imports from legacy</td><td>—</td><td>0</td><td><strong>0 modern imports from legacy</strong></td></tr>
+            <tr><td>Dependency cycles</td><td>0</td><td>0</td><td><strong>0 cycles</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        The hardened acceptance path reads the existing sealed baseline rather than regenerating it.
+        GitHub Actions also checks that verification leaves the protected baseline and tracked evidence unchanged.
+      </div>
+    </section>
+
+    <section class="section" id="clean-room">
+      <div class="section-head">
+        <h2>IBM Bob clean-room modernization run</h2>
+        <p>The historical 47-scenario corpus proves the modernization lifecycle itself was genuinely executed in IBM Bob.</p>
+      </div>
+
+      <div class="separation">
+        <strong>EVIDENCE CORPUS SEPARATION</strong><br><br>
+        Historical IBM Bob clean-room run: <strong>47 scenarios / 60 workflow steps / 183 invariant declarations</strong>.<br>
+        Hardened public package: <strong>86 scenarios / 100 workflow steps / 231 invariants</strong>.<br><br>
+        They use distinct contracts, baselines, and fingerprints. Their metrics are never combined into synthetic totals.
+      </div>
+
+      <div style="height:18px"></div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-mark">Task 1 · Bob</div>
+          <div><strong>Contract archaeology</strong><p>Bob investigated the legacy system and produced the clean-room behavioral contract and evidence. Historical result: 47 scenarios, 60 workflow steps, 183 declared invariants.</p></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-mark">Task 2 · Bob</div>
+          <div><strong>Modernization architecture</strong><p>Bob mapped the legacy monolith into a modular target architecture while preserving the behavioral contract as the acceptance boundary.</p></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-mark">Task 3 · Bob</div>
+          <div><strong>Modernization implementation</strong><p>Bob implemented the candidate. The historical clean-room candidate reached <strong style="color:var(--green)">47 / 47 ACCEPTED</strong>.</p></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-mark">Safety rehearsal</div>
+          <div><strong>Intentional blocked state</strong><p>A deliberate <code>&gt;= → &gt;</code> boundary regression was injected. Aegis returned <strong style="color:var(--red)">46 / 47 BLOCKED</strong> with a +$32.18 behavioral drift.</p></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-mark">Task 4 · Bob</div>
+          <div><strong>Drift critic and repair</strong><p>Bob diagnosed from preserved evidence and applied the one-line repair, restoring <strong style="color:var(--green)">47 / 47 ACCEPTED</strong>.</p></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-mark">Task 5 · Bob</div>
+          <div><strong>Final evidence review</strong><p>Bob reviewed the preserved clean-room evidence while Aegis retained the independent acceptance role.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="challenge">
+      <div class="section-head">
+        <h2>Who verifies the verifier?</h2>
+        <p>Aegis validates its own sensitivity through verifier tests, seeded negative controls, and separate post-freeze adversarial challenges.</p>
+      </div>
+      <div class="grid">
+        <article class="card third">
+          <span class="label green">Verifier self-validation</span>
+          <h3>32 / 32 tests</h3>
+          <p>The hardened verifier includes fail-closed contract parsing, relative-import analysis, non-vacuous mutation validation, and sealed-baseline immutability checks.</p>
+        </article>
+        <article class="card third">
+          <span class="label cyan">Curated gauntlet</span>
+          <h3>21 / 21 detected</h3>
+          <p>Seeded semantic regressions test whether the contract can actually detect meaningful behavioral drift.</p>
+        </article>
+        <article class="card third">
+          <span class="label violet">Broader holdout</span>
+          <h3>54 / 63 runnable</h3>
+          <p>Nine survivors remain disclosed. The frozen contract was not backfitted after observing them.</p>
+        </article>
+      </div>
+      <div style="height:16px"></div>
+      <div class="grid">
+        <article class="card half">
+          <span class="label green">PR-specific targeted set</span>
+          <h3>24 / 24 runnable mutations blocked</h3>
+          <ul class="clean">
+            <li>4 inclusive/exclusive boundary attacks</li>
+            <li>8 threshold shifts by ±$0.01</li>
+            <li>10 discount-rate mutations</li>
+            <li>2 tier-routing corruptions</li>
+            <li>0 survivors, 0 invalid, 0 timeout</li>
+          </ul>
+          <div class="callout">100% detection <strong>within this finite PR-specific mutation set</strong>. This is not an exhaustive mutation score.</div>
+        </article>
+        <article class="card half">
+          <span class="label violet">Historical generated holdout</span>
+          <h3>85.71% over runnable mutants</h3>
+          <ul class="clean">
+            <li>65 generated</li>
+            <li>63 runnable</li>
+            <li>54 detected</li>
+            <li>9 survivors disclosed</li>
+            <li>2 invalid / unrunnable</li>
+            <li>0 timeout / infrastructure failures</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="governance">
+      <div class="section-head">
+        <h2>Human governance is a first-class artifact</h2>
+        <p>Aegis is designed to turn raw verification into inspectable evidence that a human reviewer can use before merge.</p>
+      </div>
+      <div class="grid">
+        <article class="card third">
+          <span class="label green">Evidence certificate</span>
+          <h3>Cryptographic audit artifact</h3>
+          <p>The evidence certificate binds recorded verification artifacts and semantic fingerprints so reviewers can detect evidence changes.</p>
+          <div class="hero-actions" style="justify-content:flex-start;margin-top:18px">
+            <a class="btn" href="https://github.com/AzzamShahid/Aegis-ContractLock/blob/main/reports/evidence-certificate.md" target="_blank" rel="noreferrer">Open certificate</a>
+          </div>
+        </article>
+        <article class="card third">
+          <span class="label cyan">Executive dashboard</span>
+          <h3>At-a-glance evidence review</h3>
+          <p>The standalone dashboard surfaces contract coverage, verification status, architecture evidence, and readiness without requiring a reviewer to inspect every raw file.</p>
+          <div class="hero-actions" style="justify-content:flex-start;margin-top:18px">
+            <a class="btn" href="https://github.com/AzzamShahid/Aegis-ContractLock/blob/main/reports/dashboard.html" target="_blank" rel="noreferrer">Open dashboard source</a>
+          </div>
+        </article>
+        <article class="card third">
+          <span class="label amber">Human merge authority</span>
+          <h3>MERGE_ELIGIBLE ≠ auto-merge</h3>
+          <p>Bob may return as a read-only evidence reviewer. Aegis may mark the evidence eligible. The final merge decision remains explicitly human.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="provenance">
+      <div class="section-head">
+        <h2>IBM Bob usage, provenance & fingerprints</h2>
+        <p>The repository preserves genuine Bob task captures and keeps integrity fingerprints separate from claims of correctness or authorship.</p>
+      </div>
+
+      <div class="grid">
+        <article class="card half">
+          <span class="label cyan">Captured IBM Bob usage</span>
+          <h3>Tasks 1–5 clean-room Bobcoins</h3>
+          <p>Task 1: <strong>4.67</strong> · Task 2: <strong>2.15</strong> · Task 3: <strong>5.08</strong> · Task 4: <strong>2.25</strong> · Task 5: <strong>3.15</strong></p>
+          <div class="callout">Captured total: <strong>17.30 Bobcoins</strong>. Values come from preserved IBM Bob UI evidence and are not recomputed by Aegis.</div>
+        </article>
+        <article class="card half">
+          <span class="label amber">Preserved Bob limitations</span>
+          <h3>Subagent transparency</h3>
+          <ul class="clean warnings">
+            <li>Task 4 diagnostic subagents A and C returned malformed/garbled output; subagent B succeeded; the primary Bob agent independently re-derived the diagnosis.</li>
+            <li>Task 5 review subagent B returned malformed output; the primary agent audited provenance directly.</li>
+            <li>Unanimous subagent agreement is not claimed.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div style="height:18px"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Corpus</th><th>Evidence Descriptor</th><th>SHA-256 / Identifier</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Hardened Public</td><td>Baseline Semantic Evidence Fingerprint</td><td class="hash">2fd2c2f96614e5bcf8fa807b5c1b777fc702f53707be047ddf01c5a852680da7</td><td><strong>Sealed</strong></td></tr>
+            <tr><td>Hardened Public</td><td>Accepted Candidate Semantic Evidence Fingerprint</td><td class="hash">d919b4055c09e30ee9654d92e302aa64c46195716d53525d57023e1430216c99</td><td><strong>Accepted</strong></td></tr>
+            <tr><td>Bob Clean-Room</td><td>Historical Baseline Semantic Fingerprint</td><td class="hash">2d9d6ef6b3e1d972e0cf68c504083f239391e1becb939c6726fabdad6d906db5</td><td><strong>Preserved</strong></td></tr>
+            <tr><td>Bob Clean-Room</td><td>Historical Accepted Candidate Fingerprint</td><td class="hash">f6c79144ab8592e71b459be6729ff774740922c15207397c75950773a4e321cf</td><td><strong>Preserved</strong></td></tr>
+            <tr><td>Bob Clean-Room</td><td>Historical Blocked Rehearsal Fingerprint</td><td class="hash">d569d131fdbe2f23dd9943431f72c435138fa06f4cab4be5bf3959f43a5fd654</td><td><strong>Blocked</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="height:18px"></div>
+      <div class="grid">
+        <article class="card half">
+          <span class="label violet">Key frozen references</span>
+          <ul class="clean">
+            <li>Risky PR commit: <span class="mono">5276fa24a3f7c9e8025fe22d9995ea528fe2691e</span></li>
+            <li>Bob repair commit: <span class="mono">fabc7b7a3a960fd1df7b7c6e51c44a27f797f95a</span></li>
+            <li>Repair freeze tag: <span class="mono">aegis-pr-repair-freeze-20260927</span></li>
+            <li>Human merge commit: <span class="mono">1f79baf</span></li>
+            <li>Hardened submission tag: <span class="mono">aegis-submission-final-hardened-20260927</span></li>
+          </ul>
+        </article>
+        <article class="card half">
+          <span class="label red">Scope qualification</span>
+          <ul class="clean warnings">
+            <li>No formal proof of complete program equivalence.</li>
+            <li>No claim that the legacy business policy itself is correct.</li>
+            <li>No behavioral claim outside the defined contract and executed scenario corpus.</li>
+            <li>No guarantee that every future regression will be detected.</li>
+            <li>No hostile-code sandbox guarantee.</li>
+            <li>SHA-256 fingerprints establish integrity identity, not correctness or authorship.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div style="height:18px"></div>
+      <div class="card">
+        <span class="label green">Submission thesis</span>
+        <h3>Generation is not acceptance.</h3>
+        <p style="font-size:1.08rem">
+          <strong>IBM Bob modernizes legacy systems. Aegis reconstructs and seals the reference behavior, independently detects semantic drift, drives evidence-based repair, and gates the final human merge decision.</strong>
+        </p>
+        <div class="hero-actions" style="justify-content:flex-start;margin-top:22px">
+          <a class="btn primary" href="https://github.com/AzzamShahid/Aegis-ContractLock" target="_blank" rel="noreferrer">Inspect repository evidence</a>
+          <a class="btn" href="https://github.com/AzzamShahid/Aegis-ContractLock/blob/main/docs/pr_acceptance/PR_ACCEPTANCE_WORKFLOW.md" target="_blank" rel="noreferrer">Open PR acceptance workflow</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-row">
+      <span>Aegis ContractLock · IBM Bob 2.0 Hackathon Submission</span>
+      <span>Behavioral equivalence demonstrated across the defined contract and executed scenario corpus.</span>
+    </div>
+  </footer>
+</body>
+</html>
