@@ -1,24 +1,657 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Aegis ContractLock Evidence</title><style>
-    body{font-family:Inter,Segoe UI,Arial,sans-serif;background:#0b1020;color:#e8edf7;margin:0;padding:32px} .wrap{max-width:1100px;margin:auto}
-    .hero,.card{background:#121a2c;border:1px solid #28344f;border-radius:18px;padding:24px;margin-bottom:18px;box-shadow:0 12px 40px #0004}
-    .hero h1{margin:0 0 6px;font-size:36px} .status{font-size:28px;font-weight:800} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-    .metric{background:#0e1628;border-radius:14px;padding:16px} .n{font-size:25px;font-weight:800} .label{opacity:.72;font-size:13px;margin-top:5px}
-    table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #26324a;text-align:left} code{word-break:break-all} .scope{opacity:.72;line-height:1.5}
-    @media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}
-    </style></head><body><div class="wrap">
-    <div class="hero"><h1>AEGIS CONTRACTLOCK</h1><div>Evidence-Gated Legacy Modernization</div><p class="status">ACCEPTED</p></div>
-    <div class="grid">
-      <div class="metric"><div class="n">86/86</div><div class="label">Behavioral scenarios matched</div></div>
-      <div class="metric"><div class="n">100.0%</div><div class="label">Legacy statement coverage</div></div>
-      <div class="metric"><div class="n">99.0%</div><div class="label">Legacy branch coverage</div></div>
-      <div class="metric"><div class="n">21/21</div><div class="label">Seeded regressions detected</div></div>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aegis ContractLock — Judge Evidence Dashboard</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-sub: #172238;
+      --border: #24324f;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --green: #10b981;
+      --green-bg: rgba(16, 185, 129, 0.12);
+      --green-border: rgba(16, 185, 129, 0.35);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.14);
+      --red-border: rgba(239, 68, 68, 0.45);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --amber-border: rgba(245, 158, 11, 0.35);
+      --blue: #38bdf8;
+      --blue-bg: rgba(56, 189, 248, 0.1);
+      --indigo: #6366f1;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 28px 20px 48px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+    .header {
+      background: linear-gradient(135deg, #111a2f 0%, #0d1527 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .header-title h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+      color: #fff;
+    }
+    .header-title .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 9999px;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.05em;
+    }
+    .status-badge.accepted {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid var(--green-border);
+    }
+    .status-badge.blocked {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid var(--red-border);
+    }
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin: 0;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .story-pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .stage-row {
+      display: grid;
+      grid-template-columns: 210px 32px 1fr;
+      align-items: center;
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      transition: border-color 0.2s;
+    }
+    @media (max-width: 860px) {
+      .stage-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .stage-arrow { display: none; }
+    }
+    .stage-row.blocked-stage {
+      border-color: var(--red-border);
+      background: rgba(239, 68, 68, 0.07);
+    }
+    .stage-row.repair-stage {
+      border-color: rgba(56, 189, 248, 0.35);
+      background: rgba(56, 189, 248, 0.05);
+    }
+    .stage-name {
+      font-weight: 700;
+      font-size: 15px;
+      color: #fff;
+    }
+    .stage-name .stage-step {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 2px;
+    }
+    .stage-arrow {
+      color: var(--muted);
+      font-weight: 800;
+      text-align: center;
+      font-size: 18px;
+    }
+    .stage-details {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .stage-verdict {
+      font-weight: 800;
+      font-size: 15px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .stage-verdict.accepted {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid var(--green-border);
+    }
+    .stage-verdict.blocked {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid var(--red-border);
+    }
+    .ce-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--red-border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 12px 0;
+    }
+    .ce-title {
+      font-weight: 700;
+      color: var(--red);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ce-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .ce-item {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .ce-item-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .ce-item-val {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 3px;
+    }
+    .ce-item-val .old { color: var(--green); }
+    .ce-item-val .new { color: var(--red); }
+    .ce-item-val .delta { color: var(--amber); font-weight: 700; }
+    .repair-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 13px;
+      margin: 6px 0;
+    }
+    .repair-file {
+      color: var(--blue);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .code-del { color: var(--red); background: rgba(239, 68, 68, 0.15); display: block; padding: 2px 4px; border-radius: 4px; }
+    .code-add { color: var(--green); background: rgba(16, 185, 129, 0.15); display: block; padding: 2px 4px; border-radius: 4px; }
+    .demarcation-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(56, 189, 248, 0.15) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .demarcation-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .demarcation-text strong {
+      color: #fff;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .demarcation-text p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .metric-card {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .metric-num {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      font-family: var(--mono);
+    }
+    .metric-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .metric-sub {
+      font-size: 11px;
+      color: var(--blue);
+      margin-top: 2px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid rgba(36, 50, 79, 0.5);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .text-mono {
+      font-family: var(--mono);
+      font-size: 12.5px;
+    }
+    .badge-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-pill.pass {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid var(--green-border);
+    }
+    .fingerprints-table code {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #cbd5e1;
+      word-break: break-all;
+    }
+    .notes-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .notes-list li {
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">
+      <h1>AEGIS CONTRACTLOCK</h1>
+      <div class="subtitle">Evidence-Gated Legacy Modernization &amp; Behavioral Verifier</div>
     </div>
-    <div class="card"><h2>Structural modernization</h2><table><tr><th>Metric</th><th>Legacy</th><th>Modern</th></tr>
-      <tr><td>Python modules</td><td>1</td><td>11</td></tr>
-      <tr><td>Largest module LOC</td><td>381</td><td>205</td></tr>
-      <tr><td>Classes</td><td>6</td><td>8</td></tr>
-      <tr><td>Dependency cycles</td><td>0</td><td>0</td></tr>
-      <tr><td>Imports from legacy</td><td>—</td><td>0</td></tr></table></div>
-    <div class="card"><h2>Evidence fingerprints</h2><p>Baseline: <code>2fd2c2f96614e5bcf8fa807b5c1b777fc702f53707be047ddf01c5a852680da7</code></p><p>Candidate: <code>d919b4055c09e30ee9654d92e302aa64c46195716d53525d57023e1430216c99</code></p><p>Certificate: <code>d9131baae477a9133b3b8484c6b26e81ff71c40454ca48b6723e2b6b3b2820e7</code></p></div>
-    <div class="card scope"><strong>Scope</strong><p>Acceptance establishes behavioral equivalence across the defined contract and executed scenario corpus. It is not a formal proof of complete program equivalence.</p></div>
-    </div></body></html>
+    <div>
+      <div class="status-badge accepted">
+        <span>●</span> ACCEPTED
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: THE STORY (CHRONOLOGY) -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span>1. Evidence Story &amp; Chronology (IBM Bob Clean-Room Run)</span>
+      </h2>
+      <span class="section-tag">Historical 47-Scenario Corpus</span>
+    </div>
+
+    <div class="story-pipeline">
+
+      <!-- Step 1: IBM Bob Modernization -->
+      <div class="stage-row">
+        <div class="stage-name">
+          <span class="stage-step">Stage 1</span>
+          IBM Bob Modernization
+        </div>
+        <div class="stage-arrow">→</div>
+        <div class="stage-details">
+          <div>Clean-room candidate verified against sealed contract</div>
+          <div><span class="stage-verdict accepted">47 / 47 ACCEPTED</span></div>
+        </div>
+      </div>
+
+      <!-- Step 2: Controlled Safety Rehearsal (BLOCKED) -->
+      <div class="stage-row blocked-stage">
+        <div class="stage-name">
+          <span class="stage-step">Stage 2</span>
+          Controlled Safety Rehearsal
+        </div>
+        <div class="stage-arrow">→</div>
+        <div class="stage-details">
+          <div>Deliberately injected boundary inclusivity mutation (<code>&gt;=</code> to <code>&gt;</code>)</div>
+          <div><span class="stage-verdict blocked">46 / 47 BLOCKED</span></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Behavioral Counterexample Callout -->
+      <div class="ce-box">
+        <div class="ce-title">
+          <span>⚠ Behavioral Counterexample Spotlight</span>
+          <span style="font-weight: normal; font-size: 12px; color: var(--muted);">(Clean-Room Case: <code>vip_exact_1000_10pct</code>)</span>
+        </div>
+        <div style="font-size: 13.5px; margin-bottom: 12px; color: #e2e8f0;">
+          Deliberately mutated boundary inclusivity for VIP tier customers at <strong>exact $1,000.00 subtotal</strong>:
+        </div>
+        <div class="ce-grid">
+          <div class="ce-item">
+            <div class="ce-item-label">Discount Rate</div>
+            <div class="ce-item-val"><span class="old">10%</span> → <span class="new">7%</span></div>
+          </div>
+          <div class="ce-item">
+            <div class="ce-item-label">Invoice Grand Total</div>
+            <div class="ce-item-val"><span class="old">$965.25</span> → <span class="new">$997.43</span></div>
+          </div>
+          <div class="ce-item">
+            <div class="ce-item-label">Customer Overcharge Delta</div>
+            <div class="ce-item-val"><span class="delta">+$32.18</span></div>
+          </div>
+          <div class="ce-item">
+            <div class="ce-item-label">Cascading Pipeline Diffs</div>
+            <div class="ce-item-val">24 divergent fields across state &amp; ledger</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: IBM Bob Drift Critic -->
+      <div class="stage-row repair-stage">
+        <div class="stage-name">
+          <span class="stage-step">Stage 3</span>
+          IBM Bob Drift Critic
+        </div>
+        <div class="stage-arrow">→</div>
+        <div class="stage-details">
+          <div style="flex: 1;">
+            <div>Diagnosed from diffs; applied 1 logical-line surgical repair</div>
+            <div class="repair-box">
+              <div class="repair-file">modern_app/billing/pricing.py in <code>_discount_rate()</code></div>
+              <span class="code-del">- if subtotal &gt; Decimal("1000.00"):</span>
+              <span class="code-add">+ if subtotal &gt;= Decimal("1000.00"):</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Verification of Repaired Candidate -->
+      <div class="stage-row">
+        <div class="stage-name">
+          <span class="stage-step">Stage 4</span>
+          Re-Verification
+        </div>
+        <div class="stage-arrow">✓</div>
+        <div class="stage-details">
+          <div>Original accepted candidate fingerprint restored identically</div>
+          <div><span class="stage-verdict accepted">47 / 47 ACCEPTED</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EVIDENCE CORPUS SEPARATION BANNER -->
+  <div class="demarcation-banner">
+    <div class="demarcation-icon">🛡️</div>
+    <div class="demarcation-text">
+      <strong>EVIDENCE CORPUS SEPARATION REQUIREMENT</strong>
+      <p>
+        The <strong>IBM Bob Clean-Room Run</strong> (historical 47-scenario corpus) and the <strong>Hardened Pre-Holdout Public Package</strong> (86-scenario corpus) are distinct evidence corpora with separate contracts, baselines, and fingerprints. Aegis strictly reports both corpora individually and never combines them into synthetic totals.
+      </p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: HARDENED PUBLIC VALIDATION -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span>2. Hardened Pre-Holdout Validation Package</span>
+      </h2>
+      <span class="section-tag">Pre-Holdout Freeze Baseline</span>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">86/86</div>
+        <div class="metric-label">Behavioral Contract Scenarios</div>
+        <div class="metric-sub">0 drifted • 100 workflow steps</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">231</div>
+        <div class="metric-label">Contract Invariants</div>
+        <div class="metric-sub">0 baseline or candidate violations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">100.00%</div>
+        <div class="metric-label">Legacy Statement Coverage</div>
+        <div class="metric-sub">209 / 209 legacy statements</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">98.96%</div>
+        <div class="metric-label">Legacy Branch Coverage</div>
+        <div class="metric-sub">95 / 96 branches (1 dead check)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">21/21</div>
+        <div class="metric-label">Curated Negative Controls</div>
+        <div class="metric-sub">100.00% detection rate • 0 escaped</div>
+      </div>
+    </div>
+
+    <!-- Structural Modernization Comparison -->
+    <div style="margin-top: 24px;">
+      <h3 style="font-size: 15px; margin: 0 0 12px; color: #e2e8f0;">Structural Modernization (Decoupled DAG Architecture)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Structural Metric</th>
+            <th>Legacy Monolith</th>
+            <th>Modern Candidate</th>
+            <th>Delta / Decoupling Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Python Modules</td>
+            <td class="text-mono">1</td>
+            <td class="text-mono">11</td>
+            <td><span class="badge-pill pass">+10 modules (clean domain separation)</span></td>
+          </tr>
+          <tr>
+            <td>Largest Module LOC</td>
+            <td class="text-mono">381 LOC</td>
+            <td class="text-mono">205 LOC</td>
+            <td><span class="badge-pill pass">-176 LOC (-46.19% reduction)</span></td>
+          </tr>
+          <tr>
+            <td>Classes / Types</td>
+            <td class="text-mono">6</td>
+            <td class="text-mono">8</td>
+            <td>Typed domain models &amp; errors</td>
+          </tr>
+          <tr>
+            <td>Imports from Legacy</td>
+            <td class="text-mono">—</td>
+            <td class="text-mono">0</td>
+            <td><span class="badge-pill pass">0 modern imports from legacy</span></td>
+          </tr>
+          <tr>
+            <td>Dependency Cycles</td>
+            <td class="text-mono">0</td>
+            <td class="text-mono">0</td>
+            <td><span class="badge-pill pass">0 cycles (acyclic DAG topology)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 3: EVIDENCE FINGERPRINTS & PROVENANCE -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span>3. Cryptographic Evidence Fingerprints &amp; Provenance</span>
+      </h2>
+      <span class="section-tag">Audit Trail Integrity</span>
+    </div>
+
+    <p style="font-size: 13px; color: var(--muted); margin-top: 0;">
+      SHA-256 values represent canonical <em>semantic evidence fingerprints</em> (computed over normalized behavioral bundles) or <em>artifact/source SHA-256</em>. They serve as audit identifiers and are never characterized as mathematical proofs of correctness or authorship.
+    </p>
+
+    <table class="fingerprints-table">
+      <thead>
+        <tr>
+          <th>Corpus</th>
+          <th>Artifact / Evidence Descriptor</th>
+          <th>SHA-256 Fingerprint / Identifier</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Hardened Public</td>
+          <td>Baseline Semantic Evidence Fingerprint</td>
+          <td><code>2fd2c2f96614e5bcf8fa807b5c1b777fc702f53707be047ddf01c5a852680da7</code></td>
+          <td><span class="badge-pill pass">Sealed</span></td>
+        </tr>
+        <tr>
+          <td>Hardened Public</td>
+          <td>Accepted Candidate Semantic Evidence Fingerprint</td>
+          <td><code>d919b4055c09e30ee9654d92e302aa64c46195716d53525d57023e1430216c99</code></td>
+          <td><span class="badge-pill pass">Accepted</span></td>
+        </tr>
+        <tr>
+          <td>Hardened Public</td>
+          <td>Evidence Certificate SHA-256</td>
+          <td><code>d9131baae477a9133b3b8484c6b26e81ff71c40454ca48b6723e2b6b3b2820e7</code></td>
+          <td><span class="badge-pill pass">Certified</span></td>
+        </tr>
+        <tr>
+          <td>Bob Clean-Room</td>
+          <td>Historical Baseline Semantic Fingerprint</td>
+          <td><code>2d9d6ef6b3e1d972e0cf68c504083f239391e1becb939c6726fabdad6d906db5</code></td>
+          <td><span class="badge-pill pass">Preserved</span></td>
+        </tr>
+        <tr>
+          <td>Bob Clean-Room</td>
+          <td>Historical Accepted Candidate Fingerprint</td>
+          <td><code>f6c79144ab8592e71b459be6729ff774740922c15207397c75950773a4e321cf</code></td>
+          <td><span class="badge-pill pass">Preserved</span></td>
+        </tr>
+        <tr>
+          <td>Bob Clean-Room</td>
+          <td>Historical Blocked Rehearsal Fingerprint</td>
+          <td><code>d569d131fdbe2f23dd9943431f72c435138fa06f4cab4be5bf3959f43a5fd654</code></td>
+          <td><span class="badge-pill blocked">Blocked</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Bobcoin UI Evidence Notice -->
+    <div style="margin-top: 20px; background: var(--card-sub); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px;">
+      <h4 style="margin: 0 0 6px; font-size: 13.5px; color: #fff;">Captured IBM Bob Session Usage (Bobcoins)</h4>
+      <div style="font-size: 13px; color: var(--muted); margin-bottom: 8px;">
+        Task 1: <strong>4.67</strong> • Task 2: <strong>2.15</strong> • Task 3: <strong>5.08</strong> • Task 4: <strong>2.25</strong> • Task 5: <strong>3.15</strong> • Captured Total: <strong>17.3</strong>
+      </div>
+      <div style="font-size: 11.5px; color: var(--blue);">
+        Notice: Bobcoin values come from captured IBM Bob task-session UI evidence and are not recomputed by Aegis.
+      </div>
+    </div>
+
+    <!-- Subagent Transparency -->
+    <div style="margin-top: 16px;">
+      <h4 style="margin: 0 0 6px; font-size: 13.5px; color: #fff;">Subagent Transparency &amp; Known Limitations</h4>
+      <ul class="notes-list">
+        <li><strong>Task 4 Diagnostic Subagents:</strong> Subagents A and C returned malformed/garbled output; Subagent B succeeded; the primary IBM Bob agent independently re-derived the diagnosis directly from preserved evidence. Unanimous subagent agreement is explicitly not claimed.</li>
+        <li><strong>Task 5 Review Subagents:</strong> Review Subagent B returned malformed output; Subagents A and C succeeded where preserved evidence supports; the primary agent audited workflow provenance by direct file inspection. Unanimous subagent agreement is explicitly not claimed.</li>
+        <li><strong>Scope Qualification:</strong> Acceptance establishes behavioral equivalence across the defined contract and executed scenario corpus. It is not a formal proof of complete program equivalence.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
