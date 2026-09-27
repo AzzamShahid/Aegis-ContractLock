@@ -42,7 +42,7 @@ In this demonstration, trust is partitioned strictly between the verification ha
 
 1. **Sealed Behavioral Contract (`aegis_contract.yaml`):** The immutable contract specification defining domain operations, schemas, pre/post-conditions, invariants, and scenario test vectors.
 2. **Aegis Verifier Engine (`aegis/`):** The trusted test harness, execution runner, trace comparator, invariant evaluator, and report generator.
-3. **Legacy Reference (`legacy_app/`):** The legacy monolith serving as the authoritative reference implementation for baseline behavior.
+3. **Legacy Reference (`legacy_app/`):** The selected legacy implementation serving as the behavioral reference for baseline generation.
 4. **Sealed Baseline (`baseline/baseline.json`):** The cryptographically hashed, recorded execution traces and outputs generated from executing the legacy implementation against the sealed contract.
 
 ### Evaluated / Untrusted
@@ -86,6 +86,7 @@ Aegis ContractLock focuses on contract-driven semantic equivalence. The followin
 To prevent overclaiming:
 
 - **No Formal Mathematical Proof:** Aegis ContractLock does not claim mathematical proof, formal verification, or comprehensive program equivalence.
+- **Reference Correctness:** Aegis treats the selected legacy implementation as the behavioral reference. It does not establish that observed legacy behavior itself reflects the correct current business policy.
 - **Accurate Assertion:** The correct statement of assurance is:
   > *"Behavioral equivalence demonstrated across the defined contract and executed scenario corpus."*
 - **Defense in Depth:** Aegis contract verification should be combined with isolated CI runners, dependency vulnerability scanning, static security analysis (SAST), and human code review before production deployment.

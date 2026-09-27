@@ -1,0 +1,82 @@
+name: Aegis Protected Acceptance Boundary
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+
+jobs:
+  protected-boundary:
+    name: Protected Acceptance Boundary
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout trusted base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+
+      - name: Fetch PR head without executing PR code
+        shell: bash
+        run: |
+          git fetch --no-tags origin \
+            "${{ github.event.pull_request.head.sha }}"
+
+      - name: Enforce protected acceptance boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+
+          echo "Aegis ContractLock — Protected Acceptance Boundary"
+          echo "Base: $BASE"
+          echo "Head: $HEAD"
+          echo
+
+          git diff --name-only "$BASE...$HEAD" > changed-files.txt
+
+          echo "Changed files:"
+          cat changed-files.txt
+          echo
+
+          protected=()
+
+          while IFS= read -r file; do
+            case "$file" in
+              aegis_contract.yaml|\
+              verify_submission.ps1|\
+              security_preflight.ps1|\
+              scripts/check_protected_paths.py|\
+              .github/workflows/aegis-pr-gate.yml|\
+              .github/workflows/aegis-protected-boundary.yml|\
+              baseline/*|\
+              legacy_app/*|\
+              aegis/*|\
+              tests/*)
+                protected+=("$file")
+                ;;
+            esac
+          done < changed-files.txt
+
+          if [ "${#protected[@]}" -ne 0 ]; then
+            echo "BLOCKED — protected acceptance-boundary files changed:"
+            printf '  - %s\n' "${protected[@]}"
+            echo
+            echo "The candidate may change. The acceptance boundary may not."
+            exit 1
+          fi
+
+          echo "PASS — no protected acceptance-boundary files changed."
+          echo
+          echo "The candidate may change. The acceptance boundary may not."

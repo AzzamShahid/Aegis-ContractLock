@@ -10,6 +10,8 @@ Prior to this work, the Aegis engine test suite consisted of 7 high-level rehear
 
 This lane established **20 new comprehensive self-validation tests** in [`tests/test_verifier_self_validation.py`](tests/test_verifier_self_validation.py), expanding the engine test suite to **27 deterministic tests** without altering any sealed application or verifier core files.
 
+> **Current status:** This document preserves the historical red-team lane and its original 27-test measurement. Subsequent verifier-hardening work remediated the confirmed defects below and expanded the current hardened verifier suite to **32 deterministic passing tests**. Historical measurements are retained rather than rewritten.
+
 ---
 
 ## 2. Test Suite Expansion & Execution Metrics
@@ -105,84 +107,119 @@ This lane established **20 new comprehensive self-validation tests** in [`tests/
 
 ---
 
-## 4. Genuine Engine Defects & Design Inconsistencies Discovered
+## 4. Genuine Engine Defects Discovered — Current Remediation Status
 
-During rigorous self-validation testing, the following genuine defects and design inconsistencies in the Aegis engine were identified. Per the lane guidelines, **no code in `aegis/` was modified**, preserving the integrity of the sealed core.
+The original self-validation lane intentionally attacked the verifier rather than assuming that the verifier itself was trustworthy.
+
+That work uncovered genuine defects. The findings are preserved here as historical red-team evidence, but the current hardened implementation has since remediated the actionable engine defects and added regression coverage.
+
+| Finding | Historical red-team result | Current status |
+|---|---|---|
+| Empty mutant set could vacuously PASS | **CONFIRMED** | **FIXED + regression test** |
+| Malformed nested contract nodes leaked raw Python exceptions | **CONFIRMED** | **FIXED + regression tests** |
+| Relative `from . import x` imports were omitted from architecture analysis | **CONFIRMED** | **FIXED + regression test** |
+| Loose `legacy_app*` prefix matching produced false positives | **CONFIRMED** | **FIXED + regression test** |
+| `minimal_counterexample` name implied formal minimization | **CONFIRMED design/terminology issue** | **Public wording fixed; compatibility key retained** |
 
 ### Finding 1: Vacuous Gauntlet PASS on Empty Seeded Mutants
-- **Location**: [`aegis/gauntlet.py:22`](aegis/gauntlet.py#L22)
-- **Defect Description**:
-  ```python
-  detected = sum(1 for r in rows if r['detected'])
-  total = len(rows)
-  return {
-      'seeded_regressions': total,
-      'detected': detected,
-      'escaped': total - detected,
-      'detection_rate': round((detected / total * 100.0) if total else 0.0, 2),
-      'verifier_validation': 'PASS' if detected == total else 'FAIL',
-      'mutants': rows
-  }
-  ```
-  When `MUTANTS` is empty (`total == 0` and `detected == 0`), the condition `detected == total` evaluates to `0 == 0`, which is `True`.
-- **Actual Behavior**: The gauntlet reports `verifier_validation: 'PASS'`, `detection_rate: 0.0%`, `seeded_regressions: 0`, and `escaped: 0`.
-- **Expected Behavior**: A mutation gauntlet with zero seeded regressions has tested nothing and cannot validate the verifier. It should require at least one valid mutant (`total > 0 and detected == total`) or return `'NOT_VALIDATED'` / `'FAIL'`.
-- **Deterministic Reproduction**: `TestGauntletEngine.test_gauntlet_empty_and_invalid_configuration_behavior` in [`tests/test_verifier_self_validation.py`](tests/test_verifier_self_validation.py).
 
-### Finding 2: Unhandled `TypeError` and `AttributeError` on Non-Dict Contract Nodes
-- **Location**: [`aegis/contracts.py:23-38`](aegis/contracts.py#L23-L38)
-- **Defect Description**:
-  The loader checks whether `subject` and `cases` exist in `data`, but does not verify their types before indexing:
-  ```python
-  subject = data["subject"]
-  for key in ("legacy_factory", "candidate_factory"):
-      if key not in subject:  # Crashes with TypeError if subject is None or an integer
-          raise ContractError(f"Missing subject.{key}")
-  ```
-  Similarly, if an item in `cases` is a string or list:
-  ```python
-  for case in cases:
-      case_id = case.get("id")  # Crashes with AttributeError if case is not a dict
-  ```
-- **Actual Behavior**: Unhandled `TypeError: argument of type 'NoneType' is not iterable` or `AttributeError: 'str' object has no attribute 'get'` leaks to the caller.
-- **Expected Behavior**: Contract syntax errors should consistently raise `ContractError` with a human-readable diagnosis.
-- **Deterministic Reproduction**: Passing `subject: null` or `cases: ["invalid"]` in YAML.
+**Historical defect**
 
-### Finding 3: Relative From-Imports Without Module Omitted by Architecture AST Analyzer
-- **Location**: [`aegis/architecture.py:36-37`](aegis/architecture.py#L36-L37)
-- **Defect Description**:
-  ```python
-  elif isinstance(n, ast.ImportFrom):
-      if n.module:
-          names = [n.module]
-  ```
-  In Python packages, intra-package relative imports frequently use the syntax:
-  ```python
-  from . import discounts, taxes
-  ```
-  For this node, `n.module` is `None` (and `n.level == 1`). Because `if n.module:` evaluates to `False`, `names` remains empty.
-- **Actual Behavior**: Imports of the form `from . import <module>` are completely invisible to the architecture dependency graph and cycle detector.
-- **Expected Behavior**: The analyzer should resolve relative imports against the current module name (`module.rsplit('.', n.level)[0]`) and inspect the imported aliases (`[a.name for a in n.names]`).
+The original gauntlet could evaluate `detected == total` as `0 == 0` when no valid mutants existed, allowing an empty mutation challenge to appear successful.
 
-### Finding 4: Overly Broad Prefix Matching for Legacy Imports in Architecture Analyzer
-- **Location**: [`aegis/architecture.py:39-40`](aegis/architecture.py#L39-L40)
-- **Defect Description**:
-  ```python
-  for name in names:
-      if name.startswith("legacy_app"):
-          legacy_imports.append({"module": module, "import": name})
-  ```
-- **Actual Behavior**: Any module name that begins with the string `"legacy_app"` (such as `legacy_app_shim`, `legacy_application_helpers`, or a third-party package `legacy_app_sdk`) will be flagged as an illegal legacy import.
-- **Expected Behavior**: The condition should check for package boundary: `name == "legacy_app" or name.startswith("legacy_app.")`.
+**Current remediation**
 
-### Finding 5: Lexicographical Ordering vs. True Counterexample Minimization
-- **Location**: [`aegis/comparator.py:130`](aegis/comparator.py#L130)
-- **Defect Description**:
-  ```python
-  "minimal_counterexample": drifted[0] if drifted else None
-  ```
-  Because `all_case_ids` is sorted alphabetically (`sorted(set(baseline_cases) | set(candidate_cases))`), `drifted[0]` simply returns the first drifted case in alphabetical order. No delta debugging, input reduction, or step minimization is performed.
-- **Impact & Mitigation**: While [`aegis/report.py`](aegis/report.py) correctly renders the user-facing title as `BEHAVIORAL COUNTEREXAMPLE`, consumers relying on the programmatic dictionary key `minimal_counterexample` must be aware that the counterexample is lexicographically first, not algorithmically minimal.
+The hardened gauntlet now treats a zero-mutant challenge as **`NOT_VALIDATED`** rather than `PASS`.
+
+A regression test explicitly proves that an empty mutation suite cannot validate the verifier.
+
+**Status: FIXED + REGRESSION-TESTED**
+
+### Finding 2: Malformed Contract Nodes Leaked Raw Exceptions
+
+**Historical defect**
+
+Malformed nested YAML structures such as `subject: null`, or scalar/list values where mappings were required, could leak raw `TypeError` or `AttributeError` exceptions.
+
+**Current remediation**
+
+The hardened contract loader validates nested mapping and string requirements before accessing fields and fails closed with `ContractError`.
+
+Regression tests cover malformed subject, case, step, and input structures.
+
+**Status: FIXED + REGRESSION-TESTED**
+
+### Finding 3: Relative Imports Were Omitted by the Architecture Analyzer
+
+**Historical defect**
+
+Imports such as `from . import discounts, taxes` could be missed because `ast.ImportFrom.module` can be `None`.
+
+**Current remediation**
+
+The hardened architecture analyzer resolves relative imports and imported aliases so these dependencies participate in dependency and cycle analysis.
+
+Regression coverage explicitly exercises relative-import cases.
+
+**Status: FIXED + REGRESSION-TESTED**
+
+### Finding 4: Legacy Import Matching Was Too Broad
+
+**Historical defect**
+
+The original `name.startswith("legacy_app")` check could falsely classify unrelated names such as `legacy_application_helpers` or `legacy_app_sdk` as imports from the protected legacy package.
+
+**Current remediation**
+
+The hardened check now enforces the actual package boundary:
+
+```python
+name == "legacy_app" or name.startswith("legacy_app.")
+```
+
+Regression coverage verifies that true legacy imports are blocked while similarly named unrelated packages are not.
+
+**Status: FIXED + REGRESSION-TESTED**
+
+### Finding 5: Counterexample Naming vs. Formal Minimization
+
+**Historical issue**
+
+The internal key `minimal_counterexample` stores the selected drifted case but does not perform formal delta-debugging or mathematical input minimization.
+
+**Current remediation**
+
+User-facing reports deliberately use `BEHAVIORAL COUNTEREXAMPLE` instead of claiming a formally minimal counterexample.
+
+The internal `minimal_counterexample` key remains for compatibility with existing programmatic consumers.
+
+**Status: PUBLIC TERMINOLOGY FIXED; INTERNAL COMPATIBILITY KEY RETAINED**
+
+### Why These Findings Are Preserved
+
+These defects are not deleted from the record.
+
+They demonstrate the verifier-hardening lifecycle:
+
+```text
+Attack the verifier
+        ↓
+Discover genuine defects
+        ↓
+Reproduce deterministically
+        ↓
+Repair the verifier
+        ↓
+Add regression coverage
+        ↓
+Re-run the hardened gate
+```
+
+This is part of the Aegis trust model:
+
+> **The verifier is not trusted merely because it is the verifier. It is challenged, hardened, and regression-tested.**
+
+The current hardened verifier suite contains **32 passing tests**.
 
 ---
 
