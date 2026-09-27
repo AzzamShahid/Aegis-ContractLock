@@ -3,6 +3,7 @@ $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
 $results = [ordered]@{
+    "Security preflight"     = $false
     "Engine tests"           = $false
     "Contract coverage"      = $false
     "Behavioral equality"    = $false
@@ -82,42 +83,49 @@ function Run-Step {
 
 try {
     Run-Step `
-        "1/6 - Aegis engine tests" `
+        "1/7 - Repository security preflight" `
+        { & "$PSScriptRoot\security_preflight.ps1" } `
+        ""
+
+    $results["Security preflight"] = $true
+
+    Run-Step `
+        "2/7 - Aegis engine tests" `
         { python -m pytest tests -q } `
-        "7 passed"
+        "(?m)^\d+\s+passed\b"
 
     $results["Engine tests"] = $true
 
     Run-Step `
-        "2/6 - Legacy behavioral-contract coverage" `
+        "3/7 - Legacy behavioral-contract coverage" `
         { python -m aegis.cli coverage } `
         "100\.00%"
 
     $results["Contract coverage"] = $true
 
     Run-Step `
-        "3/6 - Behavioral equivalence" `
+        "4/7 - Behavioral equivalence" `
         { python -m aegis.cli verify } `
         "VERDICT:\s+ACCEPTED"
 
     $results["Behavioral equality"] = $true
 
     Run-Step `
-        "4/6 - Architecture integrity" `
+        "5/7 - Architecture integrity" `
         { python -m aegis.cli architecture } `
         "(?s)Modern legacy imports:\s*0.*Modern cycles\s*:\s*0"
 
     $results["Architecture"] = $true
 
     Run-Step `
-        "5/6 - Seeded regression audit" `
+        "6/7 - Seeded regression audit" `
         { python -m aegis.cli gauntlet } `
-        "21"
+        "(?s)Seeded regressions\s*:\s*21.*Detected\s*:\s*21.*Escaped\s*:\s*0.*Verifier validation:\s*PASS"
 
     $results["Mutation gauntlet"] = $true
 
     Run-Step `
-        "6/6 - Complete submission readiness" `
+        "7/7 - Complete submission readiness" `
         { python -m aegis.cli readiness } `
         "SUBMISSION READINESS:\s+READY"
 

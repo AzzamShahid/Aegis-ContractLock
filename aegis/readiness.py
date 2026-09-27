@@ -2,10 +2,9 @@ from __future__ import annotations
 import subprocess, sys
 from pathlib import Path
 from typing import Any
-from .baseline import record_baseline
 from .coverage_report import measure_contract_coverage
 from .runner import run_suite
-from .evidence import build_evidence_bundle, write_json
+from .evidence import build_evidence_bundle, read_json, write_json
 from .comparator import compare_bundles
 from .gauntlet import run_gauntlet
 from .architecture import compare_architecture
@@ -15,8 +14,8 @@ from .report import write_markdown
 
 
 def run_readiness(contract: dict[str, Any], paths: dict[str,str]) -> dict[str,Any]:
-    tests=subprocess.run([sys.executable,'-m','unittest','discover','-s','tests','-v'],capture_output=True,text=True)
-    baseline=record_baseline(contract,paths['baseline'])
+    tests=subprocess.run([sys.executable,'-m','pytest','tests','-q'],capture_output=True,text=True)
+    baseline=read_json(paths['baseline'])
     coverage_result=measure_contract_coverage(contract)
     candidate=build_evidence_bundle(contract,run_suite(contract['subject']['candidate_factory'],contract),kind='candidate')
     write_json(paths['candidate_evidence'],candidate)

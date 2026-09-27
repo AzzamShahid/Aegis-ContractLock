@@ -406,6 +406,24 @@ class TestContractValidation(unittest.TestCase):
             self.assertIn("operation/input required", str(ctx.exception))
 
 
+    def test_contract_malformed_nested_nodes_fail_closed(self):
+        malformed_contracts = [
+            ("subject_null", "version: '1.0'\nsubject: null\ncases:\n  - id: c1\n    steps: [{id: s1, operation: op, input: {}}]\n"),
+            ("case_null", "version: '1.0'\nsubject:\n  legacy_factory: 'pkg:leg'\n  candidate_factory: 'pkg:cand'\ncases:\n  - null\n"),
+            ("case_scalar", "version: '1.0'\nsubject:\n  legacy_factory: 'pkg:leg'\n  candidate_factory: 'pkg:cand'\ncases:\n  - hello\n"),
+            ("step_scalar", "version: '1.0'\nsubject:\n  legacy_factory: 'pkg:leg'\n  candidate_factory: 'pkg:cand'\ncases:\n  - id: c1\n    steps:\n      - hello\n"),
+            ("input_not_mapping", "version: '1.0'\nsubject:\n  legacy_factory: 'pkg:leg'\n  candidate_factory: 'pkg:cand'\ncases:\n  - id: c1\n    steps:\n      - id: s1\n        operation: op\n        input: hello\n"),
+        ]
+
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "contract.yaml"
+            for name, content in malformed_contracts:
+                with self.subTest(name=name):
+                    p.write_text(content, encoding="utf-8")
+                    with self.assertRaises(ContractError):
+                        load_contract(p)
+
+
 # ==============================================================================
 # Area D: Runner Engine Self-Validation
 # ==============================================================================
@@ -552,14 +570,25 @@ class TestGauntletEngine(unittest.TestCase):
             self.assertEqual(res["detected"], 0)
             self.assertEqual(res["escaped"], 0)
             self.assertEqual(res["detection_rate"], 0.0)
-            # Documents current verifier behavior: 0 == 0 evaluates to 'PASS'
-            self.assertEqual(res["verifier_validation"], "PASS")
+            # Empty challenge sets provide no evidence that the verifier works.
+            self.assertEqual(res["verifier_validation"], "NOT_VALIDATED")
 
         # 2. Missing rehearsal_mutations package raises RuntimeError
         with mock.patch.dict("sys.modules", {"rehearsal_mutations": None}):
             with self.assertRaises(RuntimeError) as ctx:
                 run_gauntlet(self.synthetic_contract, self.synthetic_baseline)
             self.assertIn("rehearsal_mutations package is required", str(ctx.exception))
+
+
+    def test_empty_mutation_suite_cannot_pass(self):
+        with mock.patch("rehearsal_mutations.MUTANTS", []):
+            res = run_gauntlet(self.synthetic_contract, self.synthetic_baseline)
+
+        self.assertEqual(res["seeded_regressions"], 0)
+        self.assertEqual(res["detected"], 0)
+        self.assertEqual(res["escaped"], 0)
+        self.assertEqual(res["verifier_validation"], "NOT_VALIDATED")
+        self.assertNotEqual(res["verifier_validation"], "PASS")
 
 
 # ==============================================================================
@@ -629,6 +658,37 @@ class TestArchitectureAnalyzer(unittest.TestCase):
             self.assertEqual(res1["class_count"], 1)
             self.assertEqual(res1["function_count"], 2)  # calculate_tax and process
             self.assertEqual(res1["total_loc"], 5)        # non-empty, non-comment lines
+
+
+    def test_architecture_detects_relative_import_cycle(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "relative_pkg"
+            root.mkdir()
+            (root / "__init__.py").write_text("", encoding="utf-8")
+            (root / "a.py").write_text("from . import b\n", encoding="utf-8")
+            (root / "b.py").write_text("from . import a\n", encoding="utf-8")
+
+            result = analyze_python_tree(root)
+
+            self.assertEqual(result["dependency_edges"], 2)
+            self.assertGreaterEqual(len(result["circular_dependencies"]), 1)
+
+    def test_architecture_legacy_prefix_boundary_avoids_false_positive(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "prefix_pkg"
+            root.mkdir()
+            (root / "__init__.py").write_text("", encoding="utf-8")
+            (root / "service.py").write_text(
+                "import legacy_application_helpers\n"
+                "import legacy_app.billing.monolith\n",
+                encoding="utf-8",
+            )
+
+            result = analyze_python_tree(root)
+            imports = [item["import"] for item in result["legacy_imports"]]
+
+            self.assertIn("legacy_app.billing.monolith", imports)
+            self.assertNotIn("legacy_application_helpers", imports)
 
 
 # ==============================================================================
@@ -766,7 +826,7 @@ class TestReadinessEngine(unittest.TestCase):
             paths = self._setup_paths(Path(td))
 
             with mock.patch("subprocess.run", return_value=proc), \
-                 mock.patch("aegis.readiness.record_baseline", return_value=make_bundle()), \
+                 mock.patch("aegis.readiness.read_json", return_value=make_bundle()), \
                  mock.patch("aegis.readiness.measure_contract_coverage", return_value=cov), \
                  mock.patch("aegis.readiness.run_suite", return_value={"cases": []}), \
                  mock.patch("aegis.readiness.build_evidence_bundle", return_value=make_bundle()), \
@@ -799,7 +859,7 @@ class TestReadinessEngine(unittest.TestCase):
             paths = self._setup_paths(Path(td))
 
             with mock.patch("subprocess.run", return_value=proc), \
-                 mock.patch("aegis.readiness.record_baseline", return_value=make_bundle()), \
+                 mock.patch("aegis.readiness.read_json", return_value=make_bundle()), \
                  mock.patch("aegis.readiness.measure_contract_coverage", return_value=cov), \
                  mock.patch("aegis.readiness.run_suite", return_value={"cases": []}), \
                  mock.patch("aegis.readiness.build_evidence_bundle", return_value=make_bundle()), \
@@ -813,6 +873,39 @@ class TestReadinessEngine(unittest.TestCase):
                 self.assertEqual(res["readiness"], "NOT_READY")
                 self.assertFalse(res["checks"]["modernization_verify"])
                 self.assertFalse(res["checks"]["certificate_no_drift"])
+
+
+    def test_readiness_reads_existing_baseline_without_regenerating_it(self):
+        contract = {
+            "version": "1.0",
+            "subject": {"candidate_factory": "dummy:cand"},
+            "cases": [make_case()],
+        }
+        cov, comp, gaunt, arch, cert, proc = self._base_mock_fixtures()
+
+        with tempfile.TemporaryDirectory() as td:
+            paths = self._setup_paths(Path(td))
+            baseline_path = Path(paths["baseline"])
+            sentinel = '{"sealed": true, "created_at_utc": "frozen"}\n'
+            baseline_path.write_text(sentinel, encoding="utf-8")
+
+            with mock.patch("subprocess.run", return_value=proc), \
+                 mock.patch("aegis.readiness.read_json", return_value=make_bundle()) as read_baseline, \
+                 mock.patch("aegis.readiness.measure_contract_coverage", return_value=cov), \
+                 mock.patch("aegis.readiness.run_suite", return_value={"cases": []}), \
+                 mock.patch("aegis.readiness.build_evidence_bundle", return_value=make_bundle()), \
+                 mock.patch("aegis.readiness.compare_bundles", return_value=comp), \
+                 mock.patch("aegis.readiness.run_gauntlet", return_value=gaunt), \
+                 mock.patch("aegis.readiness.compare_architecture", return_value=arch), \
+                 mock.patch("aegis.readiness.build_certificate", return_value=cert):
+                result = run_readiness(contract, paths)
+
+            self.assertEqual(result["readiness"], "READY")
+            read_baseline.assert_called_once_with(paths["baseline"])
+            self.assertEqual(
+                baseline_path.read_text(encoding="utf-8"),
+                sentinel,
+            )
 
 
 if __name__ == "__main__":
