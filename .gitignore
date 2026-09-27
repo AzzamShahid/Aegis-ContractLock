@@ -28,9 +28,13 @@ share/python-wheels/
 MANIFEST
 
 # Virtual environments
+.venv
 .venv/
+venv
 venv/
+env
 env/
+ENV
 ENV/
 env.bak/
 venv.bak/
@@ -59,10 +63,35 @@ Desktop.ini
 *.tmp
 *.sqlite3-journal
 
-# Environment variables
+# Environment variables & configuration secrets
 .env
 .env.*
 !.env.example
+
+# Security, private keys, and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.pkcs12
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+
+# Common credential and secret files
+*.secret
+*.secrets
+credentials.json
+client_secret*.json
+service_account*.json
+*credential*.json
+*secret*.json
+*.token
+*.jwt
+*.connectionstring
 
 # NOTE: Do NOT ignore baseline/, reports/, or bob_sessions/
 # They represent reproducible behavioral verification evidence.
