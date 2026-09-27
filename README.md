@@ -556,8 +556,8 @@ The repository security preflight checks for:
 - tracked private keys/certificates
 - cache/venv noise
 - exposed credential patterns
-- local `file:///` links
-- hard-coded `C:\Users\...` paths
+- local absolute file URI references
+- hard-coded machine-specific user-profile paths
 - evidence-directory secret exposure
 
 Security preflight must pass before the rest of the submission verification proceeds.
