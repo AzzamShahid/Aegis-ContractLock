@@ -1,0 +1,91 @@
+{
+  "corpus_name": "IBM Bob Clean-Room Historical Evidence",
+  "status": "AVAILABLE",
+  "provenance_note": "Derived from preserved clean-room evidence artifacts in bob_evidence/ and bob_sessions/. Metrics are strictly separate from the hardened public validation package.",
+  "workflow": {
+    "task1_archaeology": {
+      "task_name": "Contract Archaeology",
+      "scenarios_sealed": 47,
+      "workflow_steps": 60,
+      "invariants": 183,
+      "statement_coverage_pct": 96.65,
+      "branch_coverage_pct": 91.67,
+      "baseline_fingerprint": "2d9d6ef6b3e1d972e0cf68c504083f239391e1becb939c6726fabdad6d906db5",
+      "bobcoins_captured": 4.67
+    },
+    "task2_architecture": {
+      "task_name": "Modernization Architecture",
+      "description": "Modular architecture plan and dependency DAG",
+      "legacy_imports": 0,
+      "cycles": 0,
+      "bobcoins_captured": 2.15
+    },
+    "task3_modernization": {
+      "task_name": "Clean-Room Modernization Execution",
+      "verdict": "ACCEPTED",
+      "cases_matched": 47,
+      "total_cases": 47,
+      "candidate_fingerprint": "f6c79144ab8592e71b459be6729ff774740922c15207397c75950773a4e321cf",
+      "bobcoins_captured": 5.08
+    },
+    "task4_safety_rehearsal": {
+      "task_name": "Controlled Safety Rehearsal & Drift Critic Repair",
+      "mutation": "Deliberately injected VIP tier inclusivity mutation: subtotal >= Decimal('1000.00') -> subtotal > Decimal('1000.00')",
+      "blocked_verdict": "BLOCKED",
+      "blocked_cases_matched": 46,
+      "blocked_cases_drifted": 1,
+      "blocked_total_cases": 47,
+      "blocked_candidate_fingerprint": "d569d131fdbe2f23dd9943431f72c435138fa06f4cab4be5bf3959f43a5fd654",
+      "behavioral_counterexample": {
+        "case_id": "vip_exact_1000_10pct",
+        "description": "VIP customer exactly at $1000 threshold",
+        "baseline_rate": "0.1000",
+        "candidate_rate": "0.0700",
+        "baseline_rate_pct": "10%",
+        "candidate_rate_pct": "7%",
+        "baseline_grand_total": "965.25",
+        "candidate_grand_total": "997.43",
+        "delta": "32.18",
+        "divergent_paths_count": 24
+      },
+      "repair": {
+        "file": "modern_app/billing/pricing.py",
+        "function": "_discount_rate",
+        "logical_lines_changed": 1,
+        "patch": "- if subtotal > Decimal(\"1000.00\"):\\n+ if subtotal >= Decimal(\"1000.00\"):"
+      },
+      "repaired_verdict": "ACCEPTED",
+      "repaired_cases_matched": 47,
+      "repaired_cases_drifted": 0,
+      "repaired_candidate_fingerprint": "f6c79144ab8592e71b459be6729ff774740922c15207397c75950773a4e321cf",
+      "restored_original_fingerprint": true,
+      "bobcoins_captured": 2.25
+    },
+    "task5_review": {
+      "task_name": "Final Evidence Review",
+      "status": "READY — ALL EVIDENCE GATES PASSED",
+      "bobcoins_captured": 3.15
+    }
+  },
+  "bobcoins": {
+    "task_1": 4.67,
+    "task_2": 2.15,
+    "task_3": 5.08,
+    "task_4": 2.25,
+    "task_5": 3.15,
+    "captured_total": 17.30,
+    "note": "Bobcoin values come from captured IBM Bob task-session UI evidence and are not recomputed by Aegis."
+  },
+  "subagent_transparency": {
+    "task4": "Diagnostic subagents A and C returned malformed/garbled output; subagent B succeeded; primary agent independently re-derived diagnosis directly from preserved evidence; no unanimous agreement claim.",
+    "task5": "Review subagent B returned malformed output; subagents A and C succeeded where preserved evidence supports; primary performed direct evidence inspection; no unanimous agreement claim."
+  },
+  "architecture": {
+    "legacy_modules": 1,
+    "modern_modules": 14,
+    "largest_legacy_loc": 381,
+    "largest_modern_loc": 147,
+    "modern_legacy_imports": 0,
+    "modern_cycles": 0
+  }
+}
