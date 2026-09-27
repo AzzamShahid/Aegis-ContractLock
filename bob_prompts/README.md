@@ -1,97 +1,329 @@
 # IBM Bob Prompt Pack — Aegis ContractLock
 
-This folder contains the reusable IBM Bob workflow for applying Aegis ContractLock to another legacy modernization project.
+> **Bring your legacy application. Let IBM Bob modernize it. Let Aegis independently decide whether the evidence passes. Keep the final merge decision human.**
 
-## Core Principle
+This folder contains the reusable IBM Bob workflow used by **Aegis ContractLock** for evidence-gated legacy modernization.
 
-> **IBM Bob transforms the system. Aegis independently verifies the evidence. A human retains the final merge decision.**
-
-Aegis separates authority:
-
-- **IBM Bob** investigates, designs, modernizes, diagnoses drift, and repairs.
-- **Aegis** seals reference behavior, executes independent verification, detects drift, and gates acceptance.
-- **The human reviewer** retains final merge/deployment authority.
+It is designed so another developer can apply the same modernization process to a different legacy system without copying our billing demo.
 
 ---
 
-## Recommended Workflow
+## What This Prompt Pack Does
 
-### 1. Bootstrap the Project
+The prompt pack guides IBM Bob through the complete modernization lifecycle:
 
-Use `00_project_bootstrap.md`.
+```text
+YOUR LEGACY APPLICATION
+        |
+        v
+00  Project Bootstrap
+        |
+        v
+01  Contract Archaeology
+        |
+        v
+10  Baseline Readiness
+        |
+        v
+AEGIS SEALS LEGACY REFERENCE BEHAVIOR
+        |
+        v
+02  Modernization Architecture
+        |
+        v
+03  Modernization Implementation
+        |
+        v
+AEGIS TWIN-RUN VERIFICATION
+        |
+   +----+----+
+   |         |
+   v         v
+ACCEPTED   BLOCKED
+             |
+             v
+04  Drift Critic / Repair
+             |
+             v
+      AEGIS RE-VERIFIES
+             |
+             v
+09  Adversarial Challenge
+             |
+             v
+05  Final Evidence Review
+             |
+             v
+08  Merge Eligibility Review
+             |
+             v
+      HUMAN MERGE DECISION
+```
 
-Purpose:
+For real GitHub pull requests, use `07_pr_semantic_acceptance.md`.
 
-- inspect the legacy repository
-- identify entry points
-- identify business domains
-- identify mutable state
-- identify policy/documentation sources
-- establish modernization boundaries
+Before release or submission, use `06_integrated_audit.md`.
 
-Do not begin modernization yet.
+For additional contract-strength analysis, use `11_contract_sensitivity_review.md`.
 
-### 2. Contract Archaeology
+---
 
-Use `01_contract_archaeology.md`.
+# The Three Authorities
 
-IBM Bob investigates the legacy implementation and available policy material to reconstruct the executable behavioral contract.
+Aegis ContractLock deliberately separates who is allowed to **change**, **verify**, and **approve** software.
 
-Expected output includes:
+## IBM Bob
 
-- scenario corpus
-- workflow steps
-- business invariants
-- boundary cases
-- exception behavior
+IBM Bob may:
+
+- investigate the legacy system
+- reconstruct the behavioral contract
+- design the modernization architecture
+- implement the modern candidate
+- analyze Aegis counterexamples
+- repair candidate behavior
+- review final evidence in read-only mode
+
+IBM Bob must **not** approve its own modernization.
+
+## Aegis
+
+Aegis independently:
+
+- seals the legacy reference behavior
+- executes the behavioral contract
+- twin-runs legacy and modern implementations
+- compares observable behavior
+- detects semantic drift
+- generates behavioral counterexamples
+- validates architectural constraints
+- executes regression / mutation challenges
+- determines whether the defined acceptance evidence passes
+
+## Human Reviewer
+
+The human reviewer retains:
+
+- contract/policy judgment
+- approval of intentional baseline changes
+- risk acceptance
+- final merge/deployment authority
+
+> **IBM Bob transforms the system. Aegis independently verifies the evidence. A human decides whether to merge.**
+
+---
+
+# Before You Start
+
+You should have:
+
+```text
+your-project/
+├── legacy_app/              # existing legacy implementation
+├── policy/                  # optional business / policy documentation
+├── modern_app/              # modernization target
+├── aegis_contract.yaml      # created during contract archaeology
+├── baseline/                # sealed reference evidence
+├── reports/                 # Aegis verification evidence
+└── bob_prompts/             # this prompt pack
+```
+
+Your project may use different directories. Replace the prompt placeholders with your own paths.
+
+---
+
+# Recommended Workflow
+
+## 00 — Project Bootstrap
+
+Use:
+
+[`00_project_bootstrap.md`](00_project_bootstrap.md)
+
+### Purpose
+
+Establish the modernization workspace before Bob changes any code.
+
+Bob should identify:
+
+- legacy entry points
+- public operations
+- business domains
+- mutable state
+- persistence boundaries
+- external dependencies
+- policy/documentation sources
+- candidate modernization boundaries
+- missing information that prevents safe contract reconstruction
+
+### Important
+
+Do **not** begin modernization during this stage.
+
+---
+
+## 01 — Contract Archaeology
+
+Use:
+
+[`01_contract_archaeology.md`](01_contract_archaeology.md)
+
+### Purpose
+
+IBM Bob investigates the legacy application and reconstructs an executable behavioral contract.
+
+The contract should capture, where applicable:
+
+- return values
+- normalized exceptions
+- monetary calculations
+- exact thresholds
+- rounding behavior
+- persistent state
 - state transitions
-- ledger/audit effects
-- provenance notes
+- ledger effects
+- audit events
+- idempotency behavior
+- multi-step workflows
+- explicit invariants
+- source / policy provenance
+
+### Independence Rule
 
 The modern candidate must not be used as an answer key.
 
-### 3. Baseline Readiness Review
+The contract is intended to characterize the selected legacy reference **before** modernization acceptance.
 
-Use `10_baseline_readiness.md`.
+---
 
-Before sealing the baseline, review:
+## 10 — Baseline Readiness
+
+Use:
+
+[`10_baseline_readiness.md`](10_baseline_readiness.md)
+
+### Purpose
+
+Check whether the contract and legacy execution are stable enough to seal the reference baseline.
+
+Review:
 
 - deterministic execution
-- stable serialization
-- unique scenario IDs
+- stable monetary serialization
 - normalized exceptions
 - deterministic state snapshots
+- unique scenario IDs
+- stable ledger/audit ordering
+- explicit invariants
 - documented ambiguities
+- controlled external nondeterminism
 
-Then seal the legacy reference baseline with Aegis.
+After this review, seal the legacy reference baseline using the Aegis project workflow.
 
-### 4. Modernization Architecture
+### Critical Rule
 
-Use `02_modernization_architecture.md`.
+Once sealed for an ordinary modernization PR:
 
-IBM Bob designs the target architecture while treating the behavioral contract as the external acceptance boundary.
+> **The candidate may change. The acceptance boundary may not.**
 
-The goal is not to copy the monolith. The goal is to produce a cleaner modular implementation while preserving the behavior represented by the contract.
+The contract, baseline, verifier, and selected legacy reference should not silently move together with the candidate.
 
-### 5. Modernization Implementation
+---
 
-Use `03_modernization_implementation.md`.
+## 02 — Modernization Architecture
+
+Use:
+
+[`02_modernization_architecture.md`](02_modernization_architecture.md)
+
+### Purpose
+
+IBM Bob designs the target architecture without changing the acceptance boundary.
+
+Bob should analyze:
+
+- monolithic responsibilities
+- coupling
+- state ownership
+- dependency direction
+- candidate module boundaries
+- public compatibility strategy
+- high-risk semantic areas
+
+Typical target domains may include:
+
+```text
+domain/
+pricing/
+tax/
+billing/
+ledger/
+refund/
+persistence/
+audit/
+errors/
+orchestration/
+```
+
+Only introduce domains justified by the actual application.
+
+### Architectural Goals
+
+- preserve represented observable behavior
+- remove modern imports from the legacy package
+- avoid dependency cycles
+- reduce responsibility concentration
+- keep financial logic deterministic
+- preserve state/event semantics
+
+---
+
+## 03 — Modernization Implementation
+
+Use:
+
+[`03_modernization_implementation.md`](03_modernization_implementation.md)
+
+### Purpose
 
 IBM Bob implements the modern candidate.
 
-Key rules:
+### Bob Must Not
 
-- do not modify the sealed baseline
-- do not weaken the contract
-- do not import the legacy package
-- avoid dependency cycles
-- preserve represented behavior
+- modify the sealed baseline
+- weaken the behavioral contract
+- delete failing scenarios
+- import the legacy implementation
+- bypass difficult workflows
+- rewrite expected behavior just to pass
 
-### 6. Run Aegis Verification
+### Recommended Development Loop
 
-Run the Aegis verification process against the sealed contract.
+```text
+Implement a domain slice
+        |
+        v
+Run focused checks
+        |
+        v
+Run relevant Aegis scenarios
+        |
+        v
+Inspect semantic differences
+        |
+        v
+Repair candidate implementation
+```
 
-The result should be one of:
+When implementation is complete, Aegis—not Bob—must perform the independent acceptance run.
+
+---
+
+# Aegis Verification
+
+After modernization, run the project's Aegis verification workflow.
+
+Possible outcomes:
 
 ```text
 ACCEPTED
@@ -103,96 +335,207 @@ or:
 BLOCKED
 ```
 
-If accepted, proceed to independent challenge and review.
+## If ACCEPTED
 
-If blocked, continue to the Drift Critic.
+Proceed to:
 
-### 7. Behavioral Drift Critic
+1. adversarial challenge
+2. evidence review
+3. human merge decision
 
-Use `04_drift_critic.md`.
+## If BLOCKED
 
-IBM Bob receives the Aegis behavioral counterexample and diagnoses the smallest semantic cause.
+Preserve the counterexample and use Task 04.
 
-Bob may repair the modern candidate.
-
-Bob may not:
-
-- modify the contract
-- modify the baseline
-- weaken the verifier
-- delete the failing scenario
-- self-certify acceptance
-
-After the repair, Aegis must independently re-run verification.
-
-### 8. Adversarial Challenge
-
-Use `09_adversarial_challenge.md`.
-
-After a repair is frozen, design a finite targeted mutation challenge around the changed semantic surface.
-
-Examples:
-
-- boundary flips
-- threshold ± smallest unit
-- rate changes
-- tier-routing changes
-- branch inversions
-- rounding changes
-- state/ledger corruption
-
-Always report the exact denominator.
-
-Preferred wording:
-
-> **100% detection within this finite targeted mutation set.**
-
-Never claim exhaustive mutation coverage.
-
-### 9. Final Evidence Review
-
-Use `05_final_evidence_review.md`.
-
-IBM Bob now returns in read-only mode.
-
-Review:
-
-- verification
-- coverage
-- architecture
-- gauntlet
-- readiness
-- evidence certificate
-- baseline integrity
-- scope limitations
-
-Bob must not modify the system during this review.
+Never remove the failing evidence merely to make the candidate green.
 
 ---
 
-## Pull Request Workflow
+## 04 — Behavioral Drift Critic
 
-### PR Acceptance and Repair
+Use:
 
-Use `07_pr_semantic_acceptance.md`.
+[`04_drift_critic.md`](04_drift_critic.md)
 
-This is used after Aegis independently evaluates the candidate PR.
+### Purpose
 
-If Aegis returns `BLOCKED`, Bob diagnoses and repairs only the candidate.
+IBM Bob diagnoses a candidate after Aegis independently reports semantic drift.
 
-After repair:
+Bob receives:
+
+- failing scenario
+- expected behavior
+- candidate behavior
+- field-level differences
+- state/event differences
+- monetary delta
+- verification report
+
+Bob should identify the **smallest justified semantic cause** and repair only the modern candidate.
+
+Possible causes include:
+
+- inclusive/exclusive boundary
+- threshold
+- discount/tax rate
+- rounding
+- tier routing
+- state transition
+- persistence ordering
+- ledger mutation
+- audit/event behavior
+- exception behavior
+- idempotency
+
+### Bob Must Not
+
+- modify the legacy reference
+- modify the sealed baseline
+- weaken Aegis
+- delete the failing scenario
+- add a scenario-ID-specific hack
+- self-certify acceptance
+
+The task ends with:
 
 ```text
 BOB REPAIR COMPLETE — INDEPENDENT ACCEPTANCE REQUIRED
 ```
 
-### Read-Only Merge Eligibility Review
+Aegis must then re-run independently.
 
-Use `08_merge_eligibility_review.md`.
+---
 
-This happens only after all independent Aegis evidence exists.
+## 09 — Adversarial Challenge
 
-If requirements pass, Bob may report:
+Use:
+
+[`09_adversarial_challenge.md`](09_adversarial_challenge.md)
+
+### Purpose
+
+Challenge a repaired candidate with a finite targeted mutation set around the changed semantic surface.
+
+Useful mutation families include:
+
+- `>=` ↔ `>`
+- `<=` ↔ `<`
+- threshold ± smallest monetary unit
+- nearby constant corruption
+- discount/tax rate perturbation
+- tier-routing corruption
+- branch inversion
+- rounding changes
+- missing state transition
+- ledger sign/direction corruption
+- event omission
+- idempotency breakage
+
+### Report Exact Denominators
+
+Always report:
+
+- generated
+- applied
+- runnable
+- detected
+- survived
+- invalid
+- timeout
+
+Correct wording:
+
+> **100% detection within this finite targeted mutation set.**
+
+Incorrect wording:
+
+> “Aegis detects every possible regression.”
+
+---
+
+## 05 — Final Evidence Review
+
+Use:
+
+[`05_final_evidence_review.md`](05_final_evidence_review.md)
+
+### Mode
+
+**READ ONLY**
+
+Bob reviews the evidence after independent Aegis verification.
+
+Review:
+
+- behavioral verification
+- coverage
+- architecture
+- regression gauntlet
+- readiness
+- evidence certificate
+- baseline integrity
+- scope limitations
+
+Bob should not change code, tests, the contract, the baseline, or reports during this stage.
+
+A successful review ends with:
+
+```text
+EVIDENCE REVIEW COMPLETE — HUMAN MERGE AUTHORIZATION REQUIRED
+```
+
+---
+
+# Real Pull Request Workflow
+
+## 07 — PR Semantic Acceptance and Repair
+
+Use:
+
+[`07_pr_semantic_acceptance.md`](07_pr_semantic_acceptance.md)
+
+Use this when a real GitHub pull request has already been independently evaluated by Aegis.
+
+### If Aegis Reports BLOCKED
+
+Bob analyzes:
+
+- failing scenario
+- exact input
+- expected output
+- candidate output
+- first observable divergence
+- candidate root cause
+
+Bob repairs the candidate while preserving the intent of the refactor.
+
+Aegis then independently re-runs acceptance.
+
+Bob must not issue merge eligibility during the repair stage.
+
+---
+
+## 08 — Merge Eligibility Review
+
+Use:
+
+[`08_merge_eligibility_review.md`](08_merge_eligibility_review.md)
+
+### Mode
+
+**READ ONLY**
+
+Use only after:
+
+- pre-repair evidence exists
+- Bob's repair is recorded
+- Aegis has independently re-verified
+- verifier self-tests pass
+- architecture checks pass
+- mutation / regression evidence exists
+- baseline integrity is established
+
+If the defined evidence requirements pass, Bob may return:
 
 ```text
 MERGE_ELIGIBLE
@@ -208,106 +551,198 @@ Bob must never merge the pull request itself.
 
 ---
 
-## Pre-Release Audit
+# 06 — Integrated Audit
 
-Use `06_integrated_audit.md`.
+Use:
 
-Run this before release or submission to check:
+[`06_integrated_audit.md`](06_integrated_audit.md)
+
+Run before release, submission, or a major evidence freeze.
+
+The audit checks for:
 
 - stale metrics
+- contradictory scenario counts
 - mixed evidence corpora
 - unsupported claims
-- broken evidence references
+- broken references
 - baseline regeneration
-- verifier weaknesses
 - architecture violations
-- credential exposure
-- overclaiming
+- vacuous validation
+- malformed contracts
+- credentials or secrets
+- local absolute paths
+- formal-proof overclaims
+- unsupported safety guarantees
 
----
-
-## Optional Contract Sensitivity Review
-
-Use `11_contract_sensitivity_review.md`.
-
-This is an adversarial review of the contract itself.
-
-It asks:
-
-> **Could a meaningful semantic regression survive the current contract?**
-
-Use this to identify blind spots without backfitting the contract to known candidate behavior.
-
----
-
-## Prompt Order
+Findings should be reported by severity:
 
 ```text
-00 Project Bootstrap
-        ↓
-01 Contract Archaeology
-        ↓
-10 Baseline Readiness
-        ↓
-Aegis Baseline Seal
-        ↓
-02 Modernization Architecture
-        ↓
-03 Modernization Implementation
-        ↓
-Aegis Verification
-        ↓
-   ACCEPTED / BLOCKED
-        ↓
-04 Drift Critic (if BLOCKED)
-        ↓
-Aegis Re-Verification
-        ↓
-09 Adversarial Challenge
-        ↓
-05 Final Evidence Review
-        ↓
-08 Merge Eligibility Review
-        ↓
-HUMAN MERGE DECISION
+CRITICAL
+HIGH
+MEDIUM
+LOW
+INFORMATIONAL
 ```
-
-For pull-request-specific work, also use `07_pr_semantic_acceptance.md`.
-
-Before final release/submission, use `06_integrated_audit.md`.
 
 ---
 
-## Placeholder Variables
+# 11 — Contract Sensitivity Review
 
-The prompts use reusable placeholders such as:
+Use:
+
+[`11_contract_sensitivity_review.md`](11_contract_sensitivity_review.md)
+
+This asks a different question:
+
+> **Could a meaningful semantic regression survive the current behavioral contract?**
+
+Review sensitivity around:
+
+- exact thresholds
+- ± boundary cases
+- monetary rounding
+- taxes
+- discounts
+- tier routing
+- refunds/cancellations
+- ledger changes
+- audit events
+- exceptions
+- idempotency
+- multi-step state
+- invalid inputs
+
+Do not backfit the contract to known candidate behavior.
+
+---
+
+# Prompt Order at a Glance
+
+```text
+00  Project Bootstrap
+        ↓
+01  Contract Archaeology
+        ↓
+10  Baseline Readiness
+        ↓
+    AEGIS SEAL
+        ↓
+02  Modernization Architecture
+        ↓
+03  Modernization Implementation
+        ↓
+    AEGIS VERIFY
+        ↓
+   ┌─────────────┐
+   │             │
+ACCEPTED       BLOCKED
+                 ↓
+            04 Drift Critic
+                 ↓
+            AEGIS RE-VERIFY
+                 ↓
+09  Adversarial Challenge
+        ↓
+05  Final Evidence Review
+        ↓
+08  Merge Eligibility Review
+        ↓
+    HUMAN MERGE
+```
+
+For real pull-request work, use `07_pr_semantic_acceptance.md`.
+
+Before release/submission, use `06_integrated_audit.md`.
+
+For optional contract-strength analysis, use `11_contract_sensitivity_review.md`.
+
+---
+
+# Placeholder Variables
+
+Replace placeholders in the prompt files with paths/references from your own project.
+
+| Placeholder | Meaning |
+|---|---|
+| `{{LEGACY_ROOT}}` | legacy source directory |
+| `{{MODERN_ROOT}}` | modern candidate directory |
+| `{{POLICY_PATHS}}` | policy/business documentation |
+| `{{CONTRACT_PATH}}` | behavioral contract |
+| `{{REPORT_DIR}}` | Aegis evidence/report directory |
+| `{{ARCHITECTURE_REPORT}}` | approved architecture report |
+| `{{VERIFICATION_REPORT}}` | Aegis verification result |
+| `{{COUNTEREXAMPLE_REPORT}}` | blocked behavioral evidence |
+| `{{GAUNTLET_REPORT}}` | regression/mutation evidence |
+| `{{READINESS_REPORT}}` | submission/readiness result |
+| `{{EVIDENCE_CERTIFICATE}}` | evidence certificate |
+| `{{PR_REFERENCE}}` | pull request / candidate reference |
+| `{{PR_DIFF}}` | pull request diff |
+| `{{PR_ADVERSARIAL_REPORT}}` | targeted PR challenge evidence |
+
+Example:
 
 ```text
 {{LEGACY_ROOT}}
-{{MODERN_ROOT}}
-{{POLICY_PATHS}}
-{{CONTRACT_PATH}}
-{{REPORT_DIR}}
-{{ARCHITECTURE_REPORT}}
-{{VERIFICATION_REPORT}}
-{{COUNTEREXAMPLE_REPORT}}
-{{GAUNTLET_REPORT}}
-{{READINESS_REPORT}}
-{{EVIDENCE_CERTIFICATE}}
-{{PR_REFERENCE}}
-{{PR_DIFF}}
-{{PR_ADVERSARIAL_REPORT}}
 ```
 
-Replace them with paths and references from your own project.
+might become:
+
+```text
+legacy_app/
+```
+
+and:
+
+```text
+{{MODERN_ROOT}}
+```
+
+might become:
+
+```text
+modern_app/
+```
 
 ---
 
-## Acceptance Scope
+# Protected Acceptance Boundary
 
-Aegis uses the selected legacy implementation as the behavioral reference.
+For an ordinary modernization pull request, the candidate is the evaluated surface.
 
-It does **not** prove that the legacy business policy itself is correct.
+The acceptance boundary should remain protected.
+
+Typical protected surfaces include:
+
+```text
+aegis_contract.yaml
+baseline/
+legacy_app/
+aegis/
+tests/
+acceptance/security gate scripts
+```
+
+Intentional contract/reference changes require a separately reviewed update process.
+
+> **The candidate may change. The acceptance boundary may not.**
+
+---
+
+# Acceptance Scope
+
+Aegis treats the selected legacy implementation as the behavioral reference.
+
+That does **not** establish that the observed legacy behavior itself represents the correct current business policy.
+
+Aegis does not claim:
+
+- formal mathematical proof
+- complete whole-program equivalence
+- correctness outside the executed contract
+- guaranteed detection of every future regression
+- hostile-code sandbox security
+- correctness or authorship merely because hashes match
 
 The correct assurance statement is:
 
@@ -315,17 +750,33 @@ The correct assurance statement is:
 
 ---
 
-## What Another Developer Needs
+# Quick Start for Another Developer
 
-To reuse Aegis ContractLock:
+If you want to apply Aegis ContractLock to your own legacy project:
 
-1. bring a legacy application
-2. provide available policy/business documentation
-3. open the repository in IBM Bob
-4. begin with `00_project_bootstrap.md`
-5. follow the prompt sequence
-6. let Aegis seal and verify independently
-7. let IBM Bob repair only when Aegis produces evidence
-8. retain final merge authority as a human reviewer
+1. Clone the Aegis project/workflow.
+2. Add or point to your legacy source.
+3. Add available policy/business documentation.
+4. Open the project in IBM Bob.
+5. Start with `00_project_bootstrap.md`.
+6. Run `01_contract_archaeology.md`.
+7. Review baseline readiness with `10_baseline_readiness.md`.
+8. Seal the legacy reference behavior with Aegis.
+9. Run `02_modernization_architecture.md`.
+10. Run `03_modernization_implementation.md`.
+11. Let Aegis independently verify the modern candidate.
+12. If blocked, use `04_drift_critic.md`.
+13. Re-run Aegis.
+14. Challenge the frozen repair with `09_adversarial_challenge.md`.
+15. Review final evidence.
+16. Keep final merge authority human.
 
-That is the reusable Aegis ContractLock workflow.
+---
+
+# The Aegis Rule
+
+> **Generation is not acceptance.**
+
+IBM Bob can be extremely capable at understanding and changing software.
+
+Aegis ContractLock exists because the agent authorized to **change** software should not be the only authority allowed to **accept** that change.
