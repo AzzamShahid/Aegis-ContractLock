@@ -6,6 +6,8 @@
 [![Legacy Contract Coverage](https://img.shields.io/badge/Legacy%20Contract%20Coverage-100%25%20Statements-brightgreen)](reports/contract-coverage.md)
 [![Branch Coverage](https://img.shields.io/badge/Branches-98.96%25-brightgreen)](reports/contract-coverage.md)
 [![Mutation Audit](https://img.shields.io/badge/Seeded%20Regressions-21%2F21%20Detected-blue)](reports/gauntlet-report.md)
+[![Verifier Tests](https://img.shields.io/badge/Verifier%20Tests-27%2F27%20Passing-brightgreen)](tests/)
+[![Generated Holdout](https://img.shields.io/badge/Post--Freeze%20Holdout-54%2F63%20Detected-orange)](reports/generated-mutation-audit.md)
 [![IBM Bob](https://img.shields.io/badge/IBM%20Bob-5%20Captured%20Sessions-informational)](bob_sessions/final/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -26,10 +28,16 @@ If you have only a few minutes, inspect these in order:
 | Bob clean-room evidence review | [`bob_evidence/docs/task5-bob-evidence-review.md`](bob_evidence/docs/task5-bob-evidence-review.md) |
 | Hardened behavioral contract | [`aegis_contract.yaml`](aegis_contract.yaml) |
 | Hardened verification report | [`reports/verification.md`](reports/verification.md) |
-| Mutation audit | [`reports/gauntlet-report.md`](reports/gauntlet-report.md) |
+| Curated seeded regression gauntlet | [`reports/gauntlet-report.md`](reports/gauntlet-report.md) |
+| Post-freeze generated mutation audit | [`reports/generated-mutation-audit.md`](reports/generated-mutation-audit.md) |
+| Verifier self-validation findings | [`docs/VERIFIER_SELF_TEST_FINDINGS.md`](docs/VERIFIER_SELF_TEST_FINDINGS.md) |
 | Architecture comparison | [`reports/architecture-comparison.md`](reports/architecture-comparison.md) |
+| Tool / agent provenance | [`docs/TOOL_PROVENANCE.md`](docs/TOOL_PROVENANCE.md) |
+| IBM Bob usage statement | [`docs/IBM_BOB_USAGE_STATEMENT.md`](docs/IBM_BOB_USAGE_STATEMENT.md) |
+| Security model | [`SECURITY.MD`](SECURITY.MD) |
 | Final readiness report | [`reports/readiness.md`](reports/readiness.md) |
-| Interactive evidence dashboard | [`reports/dashboard.html`](reports/dashboard.html) |
+| Judge evidence dashboard | [`reports/dashboard.html`](reports/dashboard.html) |
+| Non-destructive guided demo | [`demo.ps1`](demo.ps1) |
 
 ### Fast reproduction
 
@@ -215,6 +223,37 @@ The IBM Bob clean-room run and the separately hardened public validation package
 
 ---
 
+## Post-Freeze Independent Challenge
+
+After the hardened public package was frozen at `aegis-holdout-freeze-20260927`, a separate Antigravity-assisted challenger evaluated the acceptance gate without modifying the frozen contract, baseline, legacy application, modern candidate, or Aegis verifier.
+
+| Post-Freeze Challenger Metric | Result |
+|---|---:|
+| Generated mutations | 65 |
+| Applied mutations | 65 |
+| Runnable mutations | 63 |
+| Detected / BLOCKED | 54 |
+| Survived frozen contract | 9 |
+| Invalid / unrunnable | 2 |
+| Timeout / infrastructure errors | 0 |
+| Detection rate over runnable mutants | **85.71%** |
+
+The denominator is the **63 runnable mutants**. Invalid or unrunnable candidates are not counted as successful detections.
+
+The nine survivors are deliberately preserved and disclosed. They may represent unexercised contract behavior, defensive or redundant logic, or transformations that are observationally indistinguishable within the exercised domain. The frozen contract was not backfitted after observing them.
+
+This is finite empirical mutation evidence, not a formal proof of exhaustive verifier sensitivity.
+
+Supporting evidence:
+
+- [`docs/HOLDOUT_MUTATION_METHODOLOGY.md`](docs/HOLDOUT_MUTATION_METHODOLOGY.md)
+- [`reports/generated-mutation-audit.md`](reports/generated-mutation-audit.md)
+- [`reports/generated-mutation-audit.json`](reports/generated-mutation-audit.json)
+- [`docs/VERIFIER_SELF_TEST_FINDINGS.md`](docs/VERIFIER_SELF_TEST_FINDINGS.md)
+- [`docs/TOOL_PROVENANCE.md`](docs/TOOL_PROVENANCE.md)
+
+---
+
 ## How Aegis Works
 
 ```text
@@ -341,7 +380,7 @@ The hardened public package modernizes the billing monolith into an isolated mod
 
 ## One-Command Judge Verification
 
-After installing the dependencies, a judge can validate the complete hardened submission with one command:
+After installing the dependencies, a judge can validate the six core hardened submission gates with one command:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -390,7 +429,7 @@ python -m pytest tests
 ```
 *Expected:*
 ```text
-7 passed
+27 passed
 ```
 
 ### Measure legacy behavioral-contract coverage
@@ -448,28 +487,42 @@ SUBMISSION READINESS: READY
 
 ## Testing Layers
 
-Aegis deliberately separates three different types of evidence.
+Aegis deliberately separates four different validation layers rather than combining them into one synthetic test count.
 
 ### 1. Behavioral-contract validation
 - 86 behavioral contract cases
 - 100 workflow steps
 - 231 explicit invariants
+- 86 / 86 modern-versus-legacy cases accepted
 
-This evaluates observable legacy-versus-modern behavior.
+This evaluates observable business behavior across the defined contract.
 
-### 2. Aegis engine test suite
-- 7 automated tests
+### 2. Aegis verifier implementation tests
+- 27 automated tests passing
+- includes the original integration tests plus targeted adversarial self-validation added after the holdout freeze
 
-These exercise verification infrastructure and integration behavior.
+These exercise comparator behavior, fingerprints, contract validation, runner behavior, architecture analysis, mutation-gauntlet behavior, report terminology, and readiness aggregation.
 
-### 3. Verifier mutation audit
-- 21 seeded semantic regressions
+### 3. Curated seeded negative-control gauntlet
+- 21 deliberately seeded semantic regressions
 - 21 detected
 - 0 escaped
+- 100.00% detection within this curated set
 
-These negative controls test whether the verifier can go red when known business semantics are altered.
+This is a deliberately selected negative-control suite, not an exhaustive mutation score.
 
-The mutation audit is a seeded negative-control suite, not an automatically generated exhaustive mutation score.
+### 4. Post-freeze generated mutation challenger
+- 65 generated mutations
+- 63 runnable
+- 54 detected
+- 9 survived the frozen contract
+- 2 invalid / unrunnable
+- 0 timeout / infrastructure failures
+- 85.71% detection rate over runnable mutants
+
+Survivors are disclosed rather than silently converted into new contract cases. This layer measures empirical sensitivity across a finite structured mutation set.
+
+The four layers answer different questions and are intentionally not summed into a single headline number.
 
 ---
 
@@ -511,7 +564,8 @@ Important limitations:
 - behavior outside the contract corpus is not evaluated
 - contract quality limits verifier coverage
 - the demo target is a controlled in-memory billing system
-- the hardened mutation audit uses deliberately selected negative controls
+- the 21-case gauntlet is a deliberately selected negative-control suite
+- the post-freeze generated holdout is finite: 54 of 63 runnable mutations were detected and 9 survivors are disclosed
 - the current candidate execution model is not a hardened hostile-code sandbox
 - hashes are integrity fingerprints, not signatures or correctness proofs
 - coverage values refer specifically to legacy behavioral-contract coverage, not whole-repository test coverage
@@ -545,8 +599,10 @@ Aegis-ContractLock/
 ├── legacy_app/                     # Legacy billing monolith
 ├── modern_app/                     # Hardened modular modernization
 ├── baseline/                       # Hardened semantic baseline
-├── tests/                          # Aegis engine tests
-├── rehearsal_mutations/            # Seeded negative controls
+├── tests/                          # Engine + verifier self-validation tests
+├── rehearsal_mutations/            # Curated seeded negative controls
+├── generated_mutations/            # Post-freeze structured mutation catalog
+├── scripts/                         # Holdout audit tooling
 │
 ├── bob_prompts/                    # IBM Bob workflow prompts
 ├── bob_sessions/
@@ -564,8 +620,14 @@ Aegis-ContractLock/
 │
 ├── aegis_contract.yaml             # Hardened 86-case contract
 ├── requirements.txt
-├── verify_submission.ps1           # One-command submission verification
+├── verify_submission.ps1           # One-command core submission verification
+├── security_preflight.ps1           # Repository security / secret hygiene check
+├── demo.ps1                         # Non-destructive ACCEPTED→BLOCKED→ACCEPTED replay
+├── SECURITY.MD
+├── THREAT_MODEL.md
 ├── .bobrules
+├── .bobignore
+├── .env.example
 ├── .gitignore
 ├── THIRD_PARTY_NOTICES.md
 ├── LICENSE                         # MIT License
