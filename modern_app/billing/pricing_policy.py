@@ -6,19 +6,24 @@ from typing import Optional, Tuple
 from .errors import ValidationError
 from .money import MONEY
 
+VIP_PREMIUM_THRESHOLD = Decimal("1000.00")
+VIP_STANDARD_THRESHOLD = Decimal("500.00")
+BUSINESS_PREMIUM_THRESHOLD = Decimal("2000.00")
+BUSINESS_STANDARD_THRESHOLD = Decimal("1000.00")
+
 
 def calculate_tier_discount(tier: str, subtotal: Decimal) -> Decimal:
     """Calculate tier discount rate based on customer tier and subtotal."""
     if tier == "VIP":
-        if subtotal >= Decimal("1000.00"):
+        if subtotal > VIP_PREMIUM_THRESHOLD:
             return Decimal("0.10")
-        if subtotal >= Decimal("500.00"):
+        if subtotal >= VIP_STANDARD_THRESHOLD:
             return Decimal("0.07")
         return Decimal("0.03")
     if tier == "BUSINESS":
-        if subtotal >= Decimal("2000.00"):
+        if subtotal >= BUSINESS_PREMIUM_THRESHOLD:
             return Decimal("0.06")
-        if subtotal >= Decimal("1000.00"):
+        if subtotal >= BUSINESS_STANDARD_THRESHOLD:
             return Decimal("0.04")
         return Decimal("0.00")
     return Decimal("0.00")  # RETAIL or default
