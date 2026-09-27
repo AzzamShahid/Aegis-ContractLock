@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#08111f" />
+  <title>Aegis ContractLock — Prove the PR deserves to merge</title>
+  <meta
+    name="description"
+    content="Aegis ContractLock is an evidence-gated acceptance layer for AI-assisted legacy modernization with IBM Bob."
+  />
+  <style>
+    :root{
+      --bg:#07111f;
+      --panel:#0c1728;
+      --panel-2:#111e31;
+      --text:#f4f7fb;
+      --muted:#9fb0c6;
+      --line:#24334a;
+      --cyan:#6ee7ff;
+      --green:#6ee7b7;
+      --red:#ff7b8b;
+      --amber:#ffd166;
+      --white:#ffffff;
+      --shadow:0 24px 70px rgba(0,0,0,.28);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(110,231,255,.10), transparent 24rem),
+        radial-gradient(circle at 90% 10%, rgba(110,231,183,.08), transparent 22rem),
+        linear-gradient(180deg,#07111f 0%,#091421 45%,#07111f 100%);
+      min-height:100vh;
+    }
+
+    a{color:inherit;text-decoration:none}
+    .wrap{width:min(1180px,calc(100% - 40px));margin:auto}
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:22px 0;position:relative;z-index:2
+    }
+    .brand{font-weight:800;letter-spacing:-.02em;font-size:1.05rem}
+    .brand span{color:var(--cyan)}
+    .nav-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:44px;padding:0 17px;border:1px solid var(--line);
+      border-radius:999px;background:rgba(255,255,255,.03);
+      color:var(--text);font-weight:700;font-size:.92rem;
+      transition:.2s ease;
+    }
+    .btn:hover{transform:translateY(-1px);border-color:#3c5474}
+    .btn.primary{
+      color:#07111f;background:linear-gradient(135deg,var(--cyan),var(--green));
+      border:none;
+    }
+
+    .hero{
+      padding:74px 0 42px;
+      text-align:center;
+    }
+    .eyebrow{
+      display:inline-flex;gap:8px;align-items:center;
+      padding:8px 12px;border:1px solid rgba(110,231,255,.22);
+      background:rgba(110,231,255,.05);
+      border-radius:999px;color:#c7f5ff;font-weight:700;font-size:.82rem;
+    }
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 16px var(--green)}
+    h1{
+      max-width:940px;margin:24px auto 18px;
+      font-size:clamp(3rem,7vw,6.6rem);line-height:.95;
+      letter-spacing:-.055em;
+    }
+    .accent{
+      background:linear-gradient(135deg,var(--cyan),var(--green));
+      -webkit-background-clip:text;background-clip:text;color:transparent
+    }
+    .sub{
+      max-width:810px;margin:0 auto;color:var(--muted);
+      font-size:clamp(1.02rem,2vw,1.25rem);line-height:1.7
+    }
+    .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+
+    .story{
+      margin:46px 0 10px;
+      display:grid;grid-template-columns:repeat(7,minmax(0,1fr));
+      gap:10px;align-items:stretch
+    }
+    .step{
+      position:relative;padding:18px 14px;
+      min-height:148px;border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border-radius:18px;text-align:left
+    }
+    .step small{display:block;color:var(--muted);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+    .step strong{font-size:1.1rem;line-height:1.15}
+    .step p{margin:8px 0 0;color:var(--muted);font-size:.84rem;line-height:1.45}
+    .bad strong{color:var(--red)}
+    .good strong{color:var(--green)}
+    .bob strong{color:var(--cyan)}
+    .merge strong{color:var(--amber)}
+
+    .section{padding:68px 0}
+    .section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:26px}
+    .section-head h2{margin:0;font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.04em}
+    .section-head p{max-width:590px;margin:0;color:var(--muted);line-height:1.65}
+
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{
+      border:1px solid var(--line);background:rgba(12,23,40,.84);
+      border-radius:var(--radius);box-shadow:var(--shadow);padding:26px
+    }
+    .card h3{margin:0 0 10px;font-size:1.22rem}
+    .card p{margin:0;color:var(--muted);line-height:1.65}
+    .metric{grid-column:span 3}
+    .metric .n{font-size:2.4rem;font-weight:850;letter-spacing:-.05em;margin-bottom:7px}
+    .metric .k{font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+    .incident{grid-column:span 7}
+    .repair{grid-column:span 5}
+    .incident-table{
+      margin-top:20px;border-top:1px solid var(--line)
+    }
+    .row{display:grid;grid-template-columns:1fr auto;gap:20px;padding:13px 0;border-bottom:1px solid var(--line)}
+    .row span:first-child{color:var(--muted)}
+    .delta{color:var(--red);font-weight:800}
+    .repair-code{
+      margin:24px 0 16px;padding:22px;border-radius:18px;border:1px solid rgba(110,231,255,.22);
+      background:#07111f;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+      font-size:1.25rem
+    }
+    .repair-code .minus{color:var(--red)}
+    .repair-code .plus{color:var(--green)}
+
+    .roles .card{grid-column:span 4}
+    .role-tag{
+      display:inline-block;padding:6px 9px;border-radius:999px;
+      font-size:.76rem;font-weight:800;margin-bottom:14px
+    }
+    .tag-bob{background:rgba(110,231,255,.10);color:var(--cyan)}
+    .tag-aegis{background:rgba(110,231,183,.10);color:var(--green)}
+    .tag-human{background:rgba(255,209,102,.10);color:var(--amber)}
+
+    .proof{grid-column:span 8}
+    .limits{grid-column:span 4}
+    ul.clean{padding:0;margin:18px 0 0;list-style:none}
+    ul.clean li{
+      padding:10px 0;border-bottom:1px solid var(--line);
+      display:flex;gap:10px;align-items:flex-start;color:var(--muted)
+    }
+    ul.clean li:before{content:"✓";color:var(--green);font-weight:900}
+    .limits ul.clean li:before{content:"•";color:var(--amber)}
+
+    .cta{
+      margin:40px 0 80px;padding:38px;border:1px solid rgba(110,231,255,.18);
+      border-radius:30px;background:
+        radial-gradient(circle at 0% 0%,rgba(110,231,255,.10),transparent 26rem),
+        rgba(12,23,40,.88);
+      display:flex;align-items:center;justify-content:space-between;gap:24px
+    }
+    .cta h2{margin:0 0 8px;font-size:2rem;letter-spacing:-.035em}
+    .cta p{margin:0;color:var(--muted)}
+    .footer{padding:26px 0 40px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}
+    .footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+    @media (max-width:1000px){
+      .story{grid-template-columns:repeat(2,1fr)}
+      .metric{grid-column:span 6}
+      .incident,.repair,.proof,.limits{grid-column:span 12}
+      .roles .card{grid-column:span 12}
+    }
+    @media (max-width:640px){
+      .wrap{width:min(100% - 24px,1180px)}
+      .nav{align-items:flex-start;gap:16px}
+      .nav-actions .btn:not(.primary){display:none}
+      .hero{padding-top:46px}
+      .story{grid-template-columns:1fr}
+      .metric{grid-column:span 12}
+      .section{padding:48px 0}
+      .section-head{align-items:start;flex-direction:column}
+      .cta{align-items:flex-start;flex-direction:column}
+      .btn{width:100%}
+      .hero-actions .btn{width:auto}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav">
+      <a class="brand" href="#"><span>AEGIS</span> CONTRACTLOCK</a>
+      <div class="nav-actions">
+        <a class="btn" href="https://github.com/AzzamShahid/Aegis-ContractLock" target="_blank" rel="noreferrer">View evidence</a>
+        <a class="btn primary" href="#story">See the PR story</a>
+      </div>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow"><span class="dot"></span> Evidence-gated AI modernization with IBM Bob</div>
+        <h1>Don't trust a green PR.<br><span class="accent">Prove it deserves to merge.</span></h1>
+        <p class="sub">
+          IBM Bob repairs the software. Aegis independently checks whether the repair preserved
+          the behavior represented by a sealed contract. A human retains the final merge decision.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#story">Watch the evidence flow</a>
+          <a class="btn" href="https://github.com/AzzamShahid/Aegis-ContractLock" target="_blank" rel="noreferrer">Open GitHub repository</a>
+        </div>
+
+        <div class="story" id="story">
+          <div class="step">
+            <small>01 · PR</small>
+            <strong>Green pull request</strong>
+            <p>Pricing thresholds were refactored into named constants.</p>
+          </div>
+          <div class="step bad">
+            <small>02 · Aegis</small>
+            <strong>85 / 86 — BLOCKED</strong>
+            <p>One behavioral scenario drifted at the exact VIP boundary.</p>
+          </div>
+          <div class="step bad">
+            <small>03 · Impact</small>
+            <strong>+$32.18</strong>
+            <p>$965.25 expected. $997.43 produced by the defective PR.</p>
+          </div>
+          <div class="step bob">
+            <small>04 · IBM Bob</small>
+            <strong>&gt; → &gt;=</strong>
+            <p>Bob diagnosed the inclusive-boundary regression and repaired one operator.</p>
+          </div>
+          <div class="step good">
+            <small>05 · Aegis</small>
+            <strong>86 / 86 — ACCEPTED</strong>
+            <p>The repaired candidate matched the executed behavioral contract.</p>
+          </div>
+          <div class="step good">
+            <small>06 · Challenge</small>
+            <strong>24 / 24 blocked</strong>
+            <p>Every runnable mutation in the finite PR-specific challenge was detected.</p>
+          </div>
+          <div class="step merge">
+            <small>07 · Human</small>
+            <strong>MERGE_ELIGIBLE</strong>
+            <p>Bob reviewed evidence read-only. A human retained merge authority.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2>The bug was small.<br>The business impact wasn't.</h2>
+          </div>
+          <p>
+            The refactor changed an inclusive threshold into an exclusive one.
+            Normal tests were green, but the sealed behavioral contract exposed the boundary drift.
+          </p>
+        </div>
+
+        <div class="grid">
+          <article class="card incident">
+            <h3>VIP threshold counterexample</h3>
+            <p>Scenario: VIP customer with a subtotal of exactly $1,000.00.</p>
+            <div class="incident-table">
+              <div class="row"><span>Expected discount</span><strong>10%</strong></div>
+              <div class="row"><span>Defective PR discount</span><strong>7%</strong></div>
+              <div class="row"><span>Expected grand total</span><strong>$965.25</strong></div>
+              <div class="row"><span>Defective PR grand total</span><strong>$997.43</strong></div>
+              <div class="row"><span>Customer-impact delta</span><strong class="delta">+$32.18</strong></div>
+            </div>
+          </article>
+
+          <article class="card repair">
+            <h3>Bob's repair</h3>
+            <p>IBM Bob diagnosed the regression as an inclusive-boundary error and changed exactly one comparison operator.</p>
+            <div class="repair-code">
+              <div class="minus">- subtotal &gt; VIP_PREMIUM_THRESHOLD</div>
+              <div class="plus">+ subtotal &gt;= VIP_PREMIUM_THRESHOLD</div>
+            </div>
+            <p>After the repair, Aegis independently re-ran acceptance and reached 86 / 86.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Measured, not hand-waved.</h2>
+          <p>
+            The submission separates the real PR story, verifier self-validation, seeded negative controls,
+            and broader historical holdout results instead of combining them into one inflated metric.
+          </p>
+        </div>
+
+        <div class="grid">
+          <article class="card metric"><div class="n">86 / 86</div><div class="k">Behavioral acceptance</div></article>
+          <article class="card metric"><div class="n">32 / 32</div><div class="k">Verifier tests</div></article>
+          <article class="card metric"><div class="n">21 / 21</div><div class="k">Seeded regressions</div></article>
+          <article class="card metric"><div class="n">24 / 24</div><div class="k">Targeted PR challenge</div></article>
+          <article class="card metric"><div class="n">100%</div><div class="k">Legacy statement coverage</div></article>
+          <article class="card metric"><div class="n">98.96%</div><div class="k">Legacy branch coverage</div></article>
+          <article class="card metric"><div class="n">0</div><div class="k">Modern legacy imports</div></article>
+          <article class="card metric"><div class="n">0</div><div class="k">Dependency cycles</div></article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Three authorities. One controlled merge.</h2>
+          <p>
+            The agent that changes the software is not the component that independently accepts the evidence.
+          </p>
+        </div>
+
+        <div class="grid roles">
+          <article class="card">
+            <span class="role-tag tag-bob">IBM BOB</span>
+            <h3>Transformation authority</h3>
+            <p>Investigates legacy behavior, designs the modernization, implements changes, diagnoses drift, and repairs the candidate.</p>
+          </article>
+          <article class="card">
+            <span class="role-tag tag-aegis">AEGIS</span>
+            <h3>Acceptance authority</h3>
+            <p>Executes the sealed contract, compares observable evidence, blocks drift, runs verification gates, and produces reproducible evidence.</p>
+          </article>
+          <article class="card">
+            <span class="role-tag tag-human">HUMAN</span>
+            <h3>Merge authority</h3>
+            <p>Reviews the evidence and retains the final decision. Aegis determines eligibility; it does not merge the pull request.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid">
+          <article class="card proof">
+            <h3>What the evidence establishes</h3>
+            <ul class="clean">
+              <li>85 / 86 exposed a real behavioral drift in the PR demonstration.</li>
+              <li>Bob's one-operator repair restored 86 / 86 across the executed contract.</li>
+              <li>32 / 32 verifier/self-validation tests pass in the hardened submission.</li>
+              <li>21 / 21 curated seeded regressions are detected.</li>
+              <li>24 / 24 runnable mutations in the finite PR-specific challenge are blocked.</li>
+              <li>GitHub Actions automatically runs the independent acceptance gate on pull requests.</li>
+            </ul>
+          </article>
+
+          <article class="card limits">
+            <h3>What we do not claim</h3>
+            <ul class="clean">
+              <li>No formal proof of whole-program equivalence.</li>
+              <li>No claim that the legacy business policy itself is correct.</li>
+              <li>No claim that all future regressions will be detected.</li>
+              <li>No hostile-code sandbox guarantee.</li>
+              <li>The 24 / 24 result applies only to its finite targeted mutation set.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div>
+          <h2>Inspect the evidence, not the marketing.</h2>
+          <p>The public repository contains Bob captures, acceptance reports, mutation evidence, architecture checks, and the reproducible seven-gate verifier.</p>
+        </div>
+        <div class="nav-actions">
+          <a class="btn primary" href="https://github.com/AzzamShahid/Aegis-ContractLock" target="_blank" rel="noreferrer">Open repository</a>
+          <a class="btn" href="https://github.com/AzzamShahid/Aegis-ContractLock/blob/main/docs/pr_acceptance/PR_ACCEPTANCE_WORKFLOW.md" target="_blank" rel="noreferrer">PR acceptance evidence</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-row">
+        <span>Aegis ContractLock · IBM Bob Hackathon Submission</span>
+        <span>Bounded behavioral equivalence across the defined contract and executed scenario corpus.</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

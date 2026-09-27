@@ -11,17 +11,98 @@
 [![PR Challenge](https://img.shields.io/badge/PR%20Challenge-24%2F24%20Blocked-brightgreen)](reports/pr_acceptance/pr-adversarial-audit.md)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Aegis ContractLock is an evidence-gated acceptance layer for AI-assisted legacy modernization.**
+**Aegis ContractLock is an end-to-end evidence-gated legacy modernization system built around IBM Bob.**
 
-IBM Bob changes the software.
+IBM Bob investigates the legacy system, reconstructs its behavioral contract, modernizes the monolith, diagnoses semantic drift, and applies focused repairs.
 
-Aegis independently checks whether the change preserved the behavior represented by a sealed contract.
+Aegis seals the legacy reference behavior, independently twin-runs the legacy and modern implementations against the same contract, and blocks acceptance when observable behavior drifts.
 
 A human retains the final merge decision.
 
 ---
 
-## 30-Second Story
+## Legacy → Modernization → Independent Acceptance
+
+Aegis is **not just a PR checker**. The core product is the complete modernization control loop:
+
+```text
+LEGACY MONOLITH
+      |
+      v
+IBM BOB — CONTRACT ARCHAEOLOGY
+reconstruct executable behavioral contract
+      |
+      v
+AEGIS — BASELINE SEAL
+returns + exceptions + state + ledger + audit + idempotency + invariants
+      |
+      v
+IBM BOB — MODERNIZATION
+monolith -> modular modern candidate
+      |
+      v
+AEGIS — TWIN-RUN VERIFICATION
+legacy reference <-> same scenarios <-> modern candidate
+      |
+      +---- behavior matches ----------------> ACCEPTED
+      |
+      +---- behavior drifts -----------------> BLOCKED
+                                                  |
+                                                  v
+                                       BEHAVIORAL COUNTEREXAMPLE
+                                                  |
+                                                  v
+                                         IBM BOB — REPAIR
+                                                  |
+                                                  v
+                                        AEGIS — RE-VERIFY
+                                                  |
+                                                  v
+                                        HUMAN MERGE DECISION
+```
+
+### What is actually being compared?
+
+Aegis does more than compare function return values. The behavioral evidence can include:
+
+- return values
+- normalized exceptions
+- persistent state
+- invoice and refund state transitions
+- ledger effects
+- audit events
+- idempotency behavior
+- explicit contract invariants
+
+### Structural modernization
+
+The hardened demonstration shows that Bob did not merely patch legacy code in place:
+
+| Structural metric | Legacy | Modern candidate |
+|---|---:|---:|
+| Python modules | 1 | 11 |
+| Largest module | 381 LOC | 205 LOC |
+| Modern imports from `legacy_app` | — | 0 |
+| Dependency cycles | 0 | 0 |
+
+### Authentic IBM Bob execution
+
+The preserved clean-room Bob workflow is a separate historical evidence corpus:
+
+- **47 scenarios**
+- **60 workflow steps**
+- **183 invariant declarations**
+- **47 / 47 ACCEPTED**
+- controlled safety rehearsal: **46 / 47 BLOCKED**
+- Bob diagnosis + one-line repair
+- re-verification: **47 / 47 ACCEPTED**
+- Tasks 1–5 captured Bobcoin total: **17.30**
+
+The clean-room 47-case corpus and the hardened 86-case public corpus are intentionally kept separate and are never combined into a synthetic score.
+
+---
+
+## Real PR Proof — 30-Second Story
 
 A real pull request looked safe.
 
@@ -164,7 +245,7 @@ Aegis focuses on that **acceptance problem**.
 
 ## The Solution
 
-Aegis ContractLock separates two authorities:
+Aegis ContractLock turns legacy modernization into an evidence-gated control loop and separates three authorities:
 
 ### IBM Bob — transformation authority
 
@@ -645,4 +726,4 @@ Aegis ContractLock original project code and project-authored materials are lice
 
 ## Submission Thesis
 
-> **Most AI developer workflows optimize generation speed. Aegis ContractLock focuses on the acceptance problem: IBM Bob transforms the system; Aegis independently checks whether that transformation preserved the behavior represented by the sealed contract; a human retains the final merge decision.**
+> **Most AI developer workflows optimize generation speed. Aegis ContractLock governs the full legacy-modernization lifecycle: IBM Bob reconstructs and modernizes the system; Aegis seals and independently verifies the behavior represented by the contract, detects drift, and gates acceptance; a human retains the final merge decision.**
