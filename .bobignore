@@ -1,0 +1,153 @@
+# ==============================================================================
+# IBM Bob Workspace Ignore (.bobignore)
+# Aegis ContractLock - Security & Workspace Hygiene Rules
+# ==============================================================================
+# This file defines file and path patterns excluded from IBM Bob indexing,
+# context inclusion, and prompt building to prevent accidental leakage of
+# secrets, credentials, binary media, and local environment noise.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment Variables and Secrets
+# ------------------------------------------------------------------------------
+.env
+.env.*
+*.env
+*.env.local
+*.env.production
+*.env.staging
+*.env.test
+
+# Never ignore the template example configuration
+!.env.example
+
+# ------------------------------------------------------------------------------
+# 2. Private Keys, Certificates, and Keystores
+# ------------------------------------------------------------------------------
+*.pem
+*.key
+*.pkcs12
+*.p12
+*.pfx
+*.asc
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+
+# ------------------------------------------------------------------------------
+# 3. Secret, Credential, and Token Patterns
+# ------------------------------------------------------------------------------
+*secret*
+*secrets*
+*password*
+*credential*
+credentials.json
+client_secret*.json
+service_account*.json
+*.token
+*.jwt
+auth_token*
+access_token*
+bearer_token*
+session_token*
+
+# ------------------------------------------------------------------------------
+# 4. Database Connection Strings and URLs
+# ------------------------------------------------------------------------------
+database.url
+*.dburl
+db_config*.json
+*.connectionstring
+
+# ------------------------------------------------------------------------------
+# 5. Version Control and Agent Context Internals
+# ------------------------------------------------------------------------------
+.git/
+.gitignore
+.gitattributes
+.github/
+.agents/
+.gemini/
+.claude/
+
+# ------------------------------------------------------------------------------
+# 6. Virtual Environments and Packaging Artifacts
+# ------------------------------------------------------------------------------
+.venv
+.venv/
+venv
+venv/
+env
+env/
+ENV
+ENV/
+env.bak/
+venv.bak/
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ------------------------------------------------------------------------------
+# 7. Bytecode and Cache Noise
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.so
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+.cache/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+htmlcov/
+
+# ------------------------------------------------------------------------------
+# 8. OS and Editor Files
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.log
+*.tmp
+*.sqlite3-journal
+
+# ------------------------------------------------------------------------------
+# 9. Heavy Binary Screenshots in Bob Sessions
+# Exclude raw image binaries from Bob context while preserving documentation
+# ------------------------------------------------------------------------------
+bob_sessions/**/*.png
+bob_sessions/**/*.jpg
+bob_sessions/**/*.jpeg
+bob_sessions/**/*.gif
+bob_sessions/**/*.webp
+
+# ------------------------------------------------------------------------------
+# 10. Aegis Evidence
+# ------------------------------------------------------------------------------
+# Aegis evidence directories are intentionally not blanket-ignored.
+# Security patterns above continue to apply inside those directories.
