@@ -32,18 +32,41 @@ def analyze_python_tree(path: str | Path) -> dict[str, Any]:
         classes=sum(isinstance(n,ast.ClassDef) for n in ast.walk(tree))
         for n in ast.walk(tree):
             names=[]
-            if isinstance(n,ast.Import): names=[a.name for a in n.names]
+            if isinstance(n,ast.Import):
+                names=[a.name for a in n.names]
             elif isinstance(n,ast.ImportFrom):
-                if n.module: names=[n.module]
+                if n.level:
+                    package_parts=module.split(".")[:-1]
+                    levels_up=max(n.level-1,0)
+                    if levels_up > len(package_parts):
+                        base_parts=[]
+                    elif levels_up:
+                        base_parts=package_parts[:-levels_up]
+                    else:
+                        base_parts=package_parts[:]
+
+                    if n.module:
+                        resolved_parts=base_parts+n.module.split(".")
+                        names=[".".join(resolved_parts)]
+                    else:
+                        names=[
+                            ".".join(base_parts+[alias.name])
+                            for alias in n.names
+                        ]
+                elif n.module:
+                    names=[n.module]
+
             for name in names:
-                if name.startswith("legacy_app"):
+                if name == "legacy_app" or name.startswith("legacy_app."):
                     legacy_imports.append({"module":module,"import":name})
                 target=None
-                if name in modules: target=name
+                if name in modules:
+                    target=name
                 else:
                     last=name.split(".")[-1]
                     target=short_to_full.get(last)
-                if target and target != module: edges.add((module,target))
+                if target and target != module:
+                    edges.add((module,target))
         metrics.append({"module":module,"file":str(file).replace("\\","/"),"loc":loc,"functions":funcs,"classes":classes})
     graph={m:set() for m in modules}
     for a,b in edges: graph.setdefault(a,set()).add(b)

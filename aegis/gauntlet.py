@@ -19,7 +19,7 @@ def run_gauntlet(contract: dict[str, Any], baseline: dict[str, Any]) -> dict[str
         rows.append({'name':name,'factory':spec,'detected':detected,'drifted_cases':comparison['drifted'],'counterexample':None if ce is None else ce['case_id']})
     detected=sum(1 for r in rows if r['detected'])
     total=len(rows)
-    return {'seeded_regressions':total,'detected':detected,'escaped':total-detected,'detection_rate':round((detected/total*100.0) if total else 0.0,2),'verifier_validation':'PASS' if detected==total else 'FAIL','mutants':rows}
+    return {'seeded_regressions':total,'detected':detected,'escaped':total-detected,'detection_rate':round((detected/total*100.0) if total else 0.0,2),'verifier_validation':'NOT_VALIDATED' if total == 0 else ('PASS' if detected == total else 'FAIL'),'mutants':rows}
 
 
 def render_gauntlet_markdown(result):

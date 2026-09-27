@@ -1,0 +1,63 @@
+name: Aegis ContractLock PR Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aegis-verification:
+    name: Aegis Independent Acceptance Gate
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Aegis submission verification
+        shell: pwsh
+        run: |
+          .\verify_submission.ps1
+
+      - name: Confirm verification did not mutate protected baseline
+        shell: pwsh
+        run: |
+          git diff --exit-code -- baseline/baseline.json
+
+          if ($LASTEXITCODE -ne 0) {
+              Write-Error "Aegis verification modified baseline/baseline.json."
+              exit 1
+          }
+
+          Write-Host "Protected baseline unchanged."
+
+      - name: Confirm verification leaves tracked evidence unchanged
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain
+
+          if ($dirty) {
+              Write-Host "Unexpected tracked changes after verification:"
+              Write-Host $dirty
+              exit 1
+          }
+
+          Write-Host "Repository remained clean after verification."
